@@ -1,0 +1,1 @@
+export function renderText(): void {}
