@@ -15,6 +15,7 @@ export class VisioError extends Error {
 
 export async function generateScene(prompt: string): Promise<SceneDefinition> {
   const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
+  if (!apiKey) throw new VisioError('auth', 'VITE_ANTHROPIC_API_KEY is not set');
 
   let response: Response;
   try {
