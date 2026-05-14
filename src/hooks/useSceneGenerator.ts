@@ -68,6 +68,7 @@ export function useSceneGenerator(): UseSceneGeneratorReturn {
         scene: null,
         loading: false,
         error: msg,
+        stepLabel: '',
         progress: 0,
       }));
     }
