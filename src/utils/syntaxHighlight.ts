@@ -1,3 +1,11 @@
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 export function syntaxHighlight(json: unknown): string {
   const str = JSON.stringify(json, null, 2);
   return str.replace(
@@ -11,7 +19,7 @@ export function syntaxHighlight(json: unknown): string {
       } else if (/null/.test(match)) {
         cls = 'json-null';
       }
-      return `<span class="${cls}">${match}</span>`;
+      return `<span class="${cls}">${escapeHtml(match)}</span>`;
     },
   );
 }
