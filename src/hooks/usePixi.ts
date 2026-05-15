@@ -95,7 +95,7 @@ export function usePixi(
 
       clearScene();
 
-      (app.renderer as PIXI.Renderer).backgroundColor = hexColor(scene.background.color);
+      (app.renderer as PIXI.Renderer).background.color = hexColor(scene.background.color);
 
       const { width, height } = app.renderer;
 
