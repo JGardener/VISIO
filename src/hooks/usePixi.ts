@@ -64,7 +64,6 @@ export function usePixi(
     app.stage.scale.set(1);
     app.stage.pivot.set(0, 0);
     app.stage.position.set(0, 0);
-    app.stage.tint = 0xffffff;
     app.stage.alpha = 1;
   }, []);
 

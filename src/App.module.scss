@@ -1,5 +1,19 @@
 .app {
   width: 100vw;
   height: 100vh;
-  background-color: var(--bg);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+
+  @include mobile {
+    flex-direction: column;
+  }
 }
