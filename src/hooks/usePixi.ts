@@ -16,7 +16,7 @@ export interface UsePixiReturn {
   appRef: React.MutableRefObject<PIXI.Application | null>;
   clearScene: () => void;
   renderScene: (scene: SceneDefinition, palette: string[] | null) => void;
-  applyControls: (speedMult: number, zoom: number) => void;
+  applyControls: (speedMult: number) => void;
 }
 
 export function usePixi(
@@ -76,16 +76,10 @@ export function usePixi(
     app.stage.alpha = 1;
   }, []);
 
-  const applyControls = useCallback((speedMult: number, zoom: number) => {
+  const applyControls = useCallback((speedMult: number) => {
     const app = appRef.current;
     if (!app) return;
-
     app.ticker.speed = speedMult;
-
-    const { width, height } = app.renderer;
-    app.stage.scale.set(zoom);
-    app.stage.pivot.set(width / 2, height / 2);
-    app.stage.position.set(width / 2, height / 2);
   }, []);
 
   const renderScene = useCallback(

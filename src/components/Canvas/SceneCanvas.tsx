@@ -9,7 +9,6 @@ interface SceneCanvasProps {
   onOpenPanel: () => void;
   controls: ControlsState;
   onSpeedMult: (v: number) => void;
-  onZoom: (v: number) => void;
   onPalette: (v: Palette | null) => void;
 }
 
@@ -19,7 +18,6 @@ export default function SceneCanvas({
   onOpenPanel,
   controls,
   onSpeedMult,
-  onZoom,
   onPalette,
 }: SceneCanvasProps) {
   return (
@@ -29,10 +27,8 @@ export default function SceneCanvas({
       <ControlsBar
         visible={hasScene}
         speedMult={controls.speedMult}
-        zoom={controls.zoom}
         palette={controls.palette}
         onSpeedMult={onSpeedMult}
-        onZoom={onZoom}
         onPalette={onPalette}
       />
       <button className={styles.mobileToggle} onClick={onOpenPanel}>

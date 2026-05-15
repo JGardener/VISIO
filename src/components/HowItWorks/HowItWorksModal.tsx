@@ -20,7 +20,7 @@ const STEPS = [
   {
     label: 'You take control',
     description:
-      'Adjust speed, zoom, and colour palette in real time. Remix two scenes together. Export your creation as a PNG. Every scene is saved to history so you can revisit or blend previous ideas.',
+      'Adjust speed and colour palette in real time. Remix two scenes together. Export your creation as a PNG. Every scene is saved to history so you can revisit or blend previous ideas.',
   },
 ];
 

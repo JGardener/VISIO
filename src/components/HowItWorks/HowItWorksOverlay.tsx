@@ -18,7 +18,7 @@ const STEPS = [
   },
   {
     label: 'You take control',
-    description: 'Adjust speed, zoom, and palette. Remix two scenes together. Export as PNG.',
+    description: 'Adjust speed and palette. Remix two scenes together. Export as PNG.',
   },
 ];
 
