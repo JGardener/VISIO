@@ -18,13 +18,12 @@ export function renderLines(
   el: LinesElement,
   width: number,
   height: number,
-  speedMult: number,
   palette: string[] | null,
   addTicker: (cb: (delta: number) => void) => void,
 ): void {
   const colors = palette ?? el.colors;
   const lines: AnimatedLine[] = [];
-  const driftSpeed = 0.6 * speedMult;
+  const driftSpeed = 0.6;
 
   for (let i = 0; i < el.count; i++) {
     const length = el.length.min + Math.random() * (el.length.max - el.length.min);

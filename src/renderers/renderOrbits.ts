@@ -14,7 +14,6 @@ export function renderOrbits(
   el: OrbitsElement,
   width: number,
   height: number,
-  speedMult: number,
   addTicker: (cb: (delta: number) => void) => void,
 ): void {
   const cx = el.center_x_pct * width;
@@ -72,7 +71,7 @@ export function renderOrbits(
 
   addTicker((delta) => {
     for (const b of animatedBodies) {
-      b.angle += b.speed * speedMult * 0.01 * delta;
+      b.angle += b.speed * 0.01 * delta;
       b.bodyContainer.x = cx + Math.cos(b.angle) * b.orbitRadius;
       b.bodyContainer.y = cy + Math.sin(b.angle) * b.orbitRadius;
     }

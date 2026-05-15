@@ -15,7 +15,6 @@ export function renderParticles(
   el: ParticlesElement,
   width: number,
   height: number,
-  speedMult: number,
   palette: string[] | null,
   addTicker: (cb: (delta: number) => void) => void,
 ): void {
@@ -25,7 +24,7 @@ export function renderParticles(
   for (let i = 0; i < el.count; i++) {
     const size = el.size.min + Math.random() * (el.size.max - el.size.min);
     const color = hexColor(colors[Math.floor(Math.random() * colors.length)]);
-    const baseSpeed = el.speed * speedMult;
+    const baseSpeed = el.speed;
 
     let vx: number;
     let vy: number;
