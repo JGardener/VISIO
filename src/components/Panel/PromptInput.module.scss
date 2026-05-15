@@ -1,1 +1,73 @@
+.section {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
 
+.textarea {
+  width: 100%;
+  height: 90px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: $font-mono;
+  padding: 10px;
+  resize: none;
+  outline: none;
+  transition: border-color 0.15s;
+  display: block;
+
+  &:focus {
+    border-color: var(--accent);
+  }
+
+  &::placeholder {
+    color: var(--text-dim);
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.chip {
+  font-size: 12px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: $font-mono;
+  transition: border-color 0.15s, color 0.15s;
+
+  &:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
+.generateBtn {
+  width: 100%;
+  padding: 13px;
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: $font-mono;
+  font-size: 13px;
+  transition: background 0.15s;
+
+  &:disabled {
+    background: var(--muted);
+    cursor: default;
+  }
+}
