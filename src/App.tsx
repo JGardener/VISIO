@@ -11,14 +11,15 @@ import {
   HistoryPanel,
   HowItWorksModal,
 } from '@/components';
+import { PALETTES } from '@/constants';
 import { slugify } from '@/utils';
 import styles from './App.module.scss';
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { renderScene } = usePixi(canvasRef);
+  const { renderScene, applyControls } = usePixi(canvasRef);
   const { controls, setSpeedMult, setZoom, setPalette } = useControls();
-  const { history, addEntry, selectedIds, toggleSelect, clearSelection, getRemixScene, getRemixPrompt } =
+  const { history, addEntry, clearHistory, selectedIds, toggleSelect, clearSelection, getRemixPrompt } =
     useHistory();
   const { scene, loading, error, stepLabel, progress, generate } = useSceneGenerator();
 
@@ -29,13 +30,18 @@ export default function App() {
 
   const lastPromptRef = useRef('');
 
-  // Re-render PIXI scene whenever scene data or controls change
+  // Re-render PIXI scene when scene data or palette changes
   useEffect(() => {
     if (!scene) return;
-    renderScene(scene, controls);
-  }, [scene, controls, renderScene]);
+    renderScene(scene, controls.palette?.colors ?? null);
+  }, [scene, controls.palette, renderScene]);
 
-  // Track new scenes for history (fires only when scene reference changes)
+  // Apply speed/zoom to PIXI without re-rendering scene objects
+  useEffect(() => {
+    applyControls(controls.speedMult, controls.zoom);
+  }, [controls.speedMult, controls.zoom, applyControls]);
+
+  // Track new scenes in history
   useEffect(() => {
     if (!scene) return;
     setHasScene(true);
@@ -44,26 +50,38 @@ export default function App() {
 
   const handleGenerate = useCallback(() => {
     lastPromptRef.current = prompt;
+    // Reset controls to defaults for every new generation
+    setSpeedMult(1);
+    setZoom(1);
+    setPalette(PALETTES[0]);
     void generate(prompt);
-  }, [generate, prompt]);
+  }, [generate, prompt, setSpeedMult, setZoom, setPalette]);
 
   const handleLoad = useCallback(
     (entry: HistoryEntry) => {
-      renderScene(entry.scene, controls);
+      // Reset controls when restoring a history entry
+      setSpeedMult(1);
+      setZoom(1);
+      setPalette(PALETTES[0]);
+      renderScene(entry.scene, null);
       setPrompt(entry.prompt);
+      lastPromptRef.current = entry.prompt;
       setHasScene(true);
     },
-    [renderScene, controls],
+    [renderScene, setSpeedMult, setZoom, setPalette],
   );
 
   const handleRemix = useCallback(() => {
-    const remixScene = getRemixScene();
-    if (!remixScene) return;
-    renderScene(remixScene, controls);
-    addEntry(getRemixPrompt(), remixScene);
+    const blendedPrompt = getRemixPrompt();
+    if (!blendedPrompt) return;
+    setPrompt(blendedPrompt);
+    lastPromptRef.current = blendedPrompt;
     clearSelection();
-    setHasScene(true);
-  }, [getRemixScene, getRemixPrompt, renderScene, controls, addEntry, clearSelection]);
+    setSpeedMult(1);
+    setZoom(1);
+    setPalette(PALETTES[0]);
+    void generate(blendedPrompt);
+  }, [getRemixPrompt, clearSelection, generate, setSpeedMult, setZoom, setPalette]);
 
   return (
     <div className={styles.app}>
@@ -95,6 +113,7 @@ export default function App() {
             selectedIds={selectedIds}
             onToggleSelect={toggleSelect}
             onClearSelection={clearSelection}
+            onClearHistory={clearHistory}
             onRemix={handleRemix}
             onLoad={handleLoad}
           />
