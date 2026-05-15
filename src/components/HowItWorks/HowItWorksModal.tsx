@@ -2,13 +2,29 @@ import PipelineStep from './PipelineStep';
 import styles from './HowItWorksModal.module.scss';
 
 const STEPS = [
-  { label: 'Describe', description: 'Type a scene description in the panel' },
-  { label: 'Generate', description: 'Claude AI creates a structured scene JSON' },
-  { label: 'Render', description: 'PIXI.js animates your scene in real time' },
-  { label: 'Explore', description: 'Adjust controls, remix, and export as PNG' },
+  {
+    label: 'You describe a scene',
+    description:
+      'Type anything — a solar system, a fire, a digital rainstorm. Plain English, no special syntax needed.',
+  },
+  {
+    label: 'Claude interprets it',
+    description:
+      "Your prompt is sent to Claude — Anthropic's AI. Claude translates your description into a structured JSON scene definition, specifying elements, colours, sizes, speeds, and animation types.",
+  },
+  {
+    label: 'PIXI.js renders it',
+    description:
+      'The JSON is passed to PIXI.js, a high-performance WebGL rendering engine, which builds and animates the scene in real time on the canvas — entirely in your browser, no server required.',
+  },
+  {
+    label: 'You take control',
+    description:
+      'Adjust speed, zoom, and colour palette in real time. Remix two scenes together. Export your creation as a PNG. Every scene is saved to history so you can revisit or blend previous ideas.',
+  },
 ];
 
-const BADGES = ['React 19', 'PIXI.js v7', 'Claude API', 'TypeScript', 'SCSS Modules'];
+const BADGES = ['Claude API', 'PIXI.js', 'React + TypeScript', 'WebGL'];
 
 interface HowItWorksModalProps {
   onClose: () => void;
