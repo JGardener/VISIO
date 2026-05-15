@@ -22,6 +22,7 @@
     transform: translateY(100%);
     transition: transform 0.3s ease;
     z-index: 30;
+    overflow-y: auto;
 
     &.open {
       transform: translateY(0);
