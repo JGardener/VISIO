@@ -6,6 +6,5 @@ export interface Palette {
 
 export interface ControlsState {
   speedMult: number;
-  zoom: number;
   palette: Palette | null;
 }
