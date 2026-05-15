@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { HistoryEntry } from '@/types';
+import type { HistoryEntry, SceneDefinition } from '@/types';
 import { useControls, useHistory, useSceneGenerator, usePixi } from '@/hooks';
 import {
   Header,
@@ -28,29 +28,36 @@ export default function App() {
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [hasScene, setHasScene] = useState(false);
 
+  // activeScene is the single source of truth for what's on the canvas.
+  // It is set either by generation (via the scene effect below) or by handleLoad.
+  // Using state ensures the render effect always has the correct scene when
+  // palette changes, eliminating the race where setPalette would trigger the
+  // effect with the generator's old scene rather than the loaded entry's scene.
+  const [activeScene, setActiveScene] = useState<SceneDefinition | null>(null);
+
   const lastPromptRef = useRef('');
 
-  // Re-render PIXI scene when scene data or palette changes
+  // Adopt generator output as the active scene
   useEffect(() => {
     if (!scene) return;
-    renderScene(scene, controls.palette?.colors ?? null);
-  }, [scene, controls.palette, renderScene]);
+    setActiveScene(scene);
+    setHasScene(true);
+    addEntry(lastPromptRef.current, scene);
+  }, [scene, addEntry]);
+
+  // Re-render PIXI whenever the active scene or palette changes
+  useEffect(() => {
+    if (!activeScene) return;
+    renderScene(activeScene, controls.palette?.colors ?? null);
+  }, [activeScene, controls.palette, renderScene]);
 
   // Apply speed/zoom to PIXI without re-rendering scene objects
   useEffect(() => {
     applyControls(controls.speedMult, controls.zoom);
   }, [controls.speedMult, controls.zoom, applyControls]);
 
-  // Track new scenes in history
-  useEffect(() => {
-    if (!scene) return;
-    setHasScene(true);
-    addEntry(lastPromptRef.current, scene);
-  }, [scene, addEntry]);
-
   const handleGenerate = useCallback(() => {
     lastPromptRef.current = prompt;
-    // Reset controls to defaults for every new generation
     setSpeedMult(1);
     setZoom(1);
     setPalette(PALETTES[0]);
@@ -59,16 +66,15 @@ export default function App() {
 
   const handleLoad = useCallback(
     (entry: HistoryEntry) => {
-      // Reset controls when restoring a history entry
       setSpeedMult(1);
       setZoom(1);
       setPalette(PALETTES[0]);
-      renderScene(entry.scene, null);
+      setActiveScene(entry.scene);
       setPrompt(entry.prompt);
       lastPromptRef.current = entry.prompt;
       setHasScene(true);
     },
-    [renderScene, setSpeedMult, setZoom, setPalette],
+    [setSpeedMult, setZoom, setPalette],
   );
 
   const handleRemix = useCallback(() => {
