@@ -1,5 +1,5 @@
 const CLAUDE_MODEL = 'claude-sonnet-4-6';
-const MAX_TOKENS = 1024;
+const MAX_TOKENS = 2048;
 const SYSTEM_PROMPT = `You are a creative visual scene generator. When given a scene description, respond with ONLY a valid JSON object:
 
 {

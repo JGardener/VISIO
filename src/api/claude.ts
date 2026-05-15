@@ -55,11 +55,17 @@ export async function generateScene(prompt: string): Promise<SceneDefinition> {
     throw new VisioError('empty', 'Empty response from Claude');
   }
 
-  // Strip markdown code fences if Claude wraps the JSON
-  const jsonText = text
-    .replace(/^```(?:json)?\n?/, '')
-    .replace(/\n?```$/, '')
-    .trim();
+  // Extract JSON — handle bare JSON, code fences anywhere in the response,
+  // and preamble text Claude sometimes adds for non-standard prompts.
+  let jsonText: string;
+  const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (fenceMatch) {
+    jsonText = fenceMatch[1].trim();
+  } else {
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    jsonText = start !== -1 && end > start ? text.slice(start, end + 1) : text.trim();
+  }
 
   let scene: SceneDefinition;
   try {
