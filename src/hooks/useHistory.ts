@@ -6,10 +6,10 @@ const MAX_ENTRIES = 8;
 export interface UseHistoryReturn {
   history: HistoryEntry[];
   addEntry: (prompt: string, scene: SceneDefinition) => void;
+  clearHistory: () => void;
   selectedIds: number[];
   toggleSelect: (ts: number) => void;
   clearSelection: () => void;
-  getRemixScene: () => SceneDefinition | null;
   getRemixPrompt: () => string;
 }
 
@@ -25,10 +25,15 @@ export function useHistory(): UseHistoryReturn {
     });
   }, []);
 
+  const clearHistory = useCallback(() => {
+    setHistory([]);
+    setSelectedIds([]);
+  }, []);
+
   const toggleSelect = useCallback((ts: number) => {
     setSelectedIds((prev) => {
       if (prev.includes(ts)) return prev.filter((id) => id !== ts);
-      if (prev.length >= 2) return [prev[1], ts]; // drop oldest, add new
+      if (prev.length >= 2) return [prev[1], ts];
       return [...prev, ts];
     });
   }, []);
@@ -37,26 +42,14 @@ export function useHistory(): UseHistoryReturn {
     setSelectedIds([]);
   }, []);
 
-  const getRemixScene = useCallback((): SceneDefinition | null => {
-    if (selectedIds.length !== 2) return null;
-    const [id1, id2] = selectedIds;
-    const e1 = history.find((e) => e.ts === id1);
-    const e2 = history.find((e) => e.ts === id2);
-    if (!e1 || !e2) return null;
-    return {
-      background: e1.scene.background,
-      elements: [...e1.scene.elements, ...e2.scene.elements],
-    };
-  }, [history, selectedIds]);
-
   const getRemixPrompt = useCallback((): string => {
     if (selectedIds.length !== 2) return '';
     const [id1, id2] = selectedIds;
     const e1 = history.find((e) => e.ts === id1);
     const e2 = history.find((e) => e.ts === id2);
     if (!e1 || !e2) return '';
-    return `Remix: ${e1.prompt} + ${e2.prompt}`;
+    return `${e1.prompt} combined with ${e2.prompt}`;
   }, [history, selectedIds]);
 
-  return { history, addEntry, selectedIds, toggleSelect, clearSelection, getRemixScene, getRemixPrompt };
+  return { history, addEntry, clearHistory, selectedIds, toggleSelect, clearSelection, getRemixPrompt };
 }

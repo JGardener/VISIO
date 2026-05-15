@@ -8,6 +8,7 @@ interface HistoryPanelProps {
   selectedIds: number[];
   onToggleSelect: (ts: number) => void;
   onClearSelection: () => void;
+  onClearHistory: () => void;
   onRemix: () => void;
   onLoad: (entry: HistoryEntry) => void;
 }
@@ -17,6 +18,7 @@ export default function HistoryPanel({
   selectedIds,
   onToggleSelect,
   onClearSelection,
+  onClearHistory,
   onRemix,
   onLoad,
 }: HistoryPanelProps) {
@@ -24,7 +26,7 @@ export default function HistoryPanel({
 
   if (history.length === 0) return null;
 
-  function handleClear() {
+  function handleCancelSelect() {
     onClearSelection();
     setSelectMode(false);
   }
@@ -32,6 +34,11 @@ export default function HistoryPanel({
   function handleRemix() {
     onRemix();
     setSelectMode(false);
+  }
+
+  function handleClearHistory() {
+    setSelectMode(false);
+    onClearHistory();
   }
 
   return (
@@ -45,8 +52,8 @@ export default function HistoryPanel({
             </button>
           )}
           {selectMode ? (
-            <button className={styles.actionBtn} onClick={handleClear}>
-              Clear
+            <button className={styles.actionBtn} onClick={handleCancelSelect}>
+              Cancel
             </button>
           ) : (
             history.length >= 2 && (
@@ -55,6 +62,9 @@ export default function HistoryPanel({
               </button>
             )
           )}
+          <button className={styles.actionBtn} onClick={handleClearHistory}>
+            Clear
+          </button>
         </div>
       </div>
       <div className={styles.itemsList}>
