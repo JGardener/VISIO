@@ -1,1 +1,78 @@
+.sceneJson {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border);
+}
 
+.jsonHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px 8px;
+  flex-shrink: 0;
+}
+
+.label {
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: $font-mono;
+}
+
+.copyBtn {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 10px;
+  padding: 3px 10px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: $font-mono;
+  transition: color 0.15s, border-color 0.15s;
+
+  &.copied {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+}
+
+.jsonBlock {
+  flex: 1;
+  overflow-y: auto;
+  margin: 0 20px 20px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px;
+  font-size: 13px;
+  font-family: $font-mono;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.6;
+}
+
+// Global JSON syntax highlight token colours (used by syntaxHighlight() output)
+:global {
+  .json-key {
+    color: #7eb8f7;
+  }
+
+  .json-string {
+    color: #98d49e;
+  }
+
+  .json-number {
+    color: #f5a97f;
+  }
+
+  .json-boolean {
+    color: var(--accent);
+  }
+
+  .json-null {
+    color: var(--text-dim);
+  }
+}
