@@ -123,7 +123,7 @@ export default function App() {
             onRemix={handleRemix}
             onLoad={handleLoad}
           />
-          <SceneJSON scene={scene} />
+          <SceneJSON scene={activeScene} />
           <StatusLog loading={loading} error={error} stepLabel={stepLabel} progress={progress} />
         </Panel>
       </main>
