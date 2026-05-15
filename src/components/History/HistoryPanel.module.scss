@@ -1,1 +1,62 @@
+.historySection {
+  border-bottom: 1px solid var(--border);
+}
 
+.historyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+}
+
+.label {
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: $font-mono;
+}
+
+.headerActions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.actionBtn {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 10px;
+  padding: 3px 8px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: $font-mono;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: border-color 0.15s, color 0.15s;
+
+  &:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
+.remixBtn {
+  background: var(--accent2);
+  border-color: var(--accent2);
+  color: #000;
+  font-weight: 700;
+
+  &:hover {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    color: #000;
+    opacity: 0.85;
+  }
+}
+
+.itemsList {
+  max-height: 140px;
+  overflow-y: auto;
+}
