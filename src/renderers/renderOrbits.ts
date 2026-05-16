@@ -14,7 +14,7 @@ export function renderOrbits(
   el: OrbitsElement,
   width: number,
   height: number,
-  addTicker: (cb: (delta: number) => void) => void,
+  addTicker: (cb: (ticker: PIXI.Ticker) => void) => void,
 ): void {
   const cx = el.center_x_pct * width;
   const cy = el.center_y_pct * height;
@@ -22,22 +22,18 @@ export function renderOrbits(
 
   // Star glow halo
   const starGlow = new PIXI.Graphics();
-  starGlow.beginFill(starColor, 0.12);
-  starGlow.drawCircle(cx, cy, el.star.radius * 3.5);
-  starGlow.endFill();
+  starGlow.circle(cx, cy, el.star.radius * 3.5).fill({ color: starColor, alpha: 0.12 });
   container.addChild(starGlow);
 
   // Star body
   const starGfx = new PIXI.Graphics();
-  starGfx.beginFill(starColor);
-  starGfx.drawCircle(cx, cy, el.star.radius);
-  starGfx.endFill();
+  starGfx.circle(cx, cy, el.star.radius).fill({ color: starColor });
   container.addChild(starGfx);
 
   // Subtle star pulse
   let starPhase = 0;
-  addTicker((delta) => {
-    starPhase += 0.02 * delta;
+  addTicker((ticker) => {
+    starPhase += 0.02 * ticker.deltaTime;
     starGlow.alpha = 0.7 + 0.3 * Math.sin(starPhase);
   });
 
@@ -53,25 +49,21 @@ export function renderOrbits(
 
     if (body.glow) {
       const glow = new PIXI.Graphics();
-      glow.beginFill(bodyColor, 0.15);
-      glow.drawCircle(0, 0, body.radius * 2.8);
-      glow.endFill();
+      glow.circle(0, 0, body.radius * 2.8).fill({ color: bodyColor, alpha: 0.15 });
       bodyContainer.addChild(glow);
     }
 
     const bodyGfx = new PIXI.Graphics();
-    bodyGfx.beginFill(bodyColor);
-    bodyGfx.drawCircle(0, 0, body.radius);
-    bodyGfx.endFill();
+    bodyGfx.circle(0, 0, body.radius).fill({ color: bodyColor });
     bodyContainer.addChild(bodyGfx);
 
     container.addChild(bodyContainer);
     animatedBodies.push({ bodyContainer, orbitRadius, speed: body.speed, angle: initialAngle });
   }
 
-  addTicker((delta) => {
+  addTicker((ticker) => {
     for (const b of animatedBodies) {
-      b.angle += b.speed * 0.01 * delta;
+      b.angle += b.speed * 0.01 * ticker.deltaTime;
       b.bodyContainer.x = cx + Math.cos(b.angle) * b.orbitRadius;
       b.bodyContainer.y = cy + Math.sin(b.angle) * b.orbitRadius;
     }

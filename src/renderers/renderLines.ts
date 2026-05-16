@@ -19,7 +19,7 @@ export function renderLines(
   width: number,
   height: number,
   palette: string[] | null,
-  addTicker: (cb: (delta: number) => void) => void,
+  addTicker: (cb: (ticker: PIXI.Ticker) => void) => void,
 ): void {
   const colors = palette ?? el.colors;
   const lines: AnimatedLine[] = [];
@@ -45,10 +45,10 @@ export function renderLines(
     });
   }
 
-  addTicker((delta) => {
+  addTicker((ticker) => {
     for (const l of lines) {
-      l.x += l.vx * delta;
-      l.y += l.vy * delta;
+      l.x += l.vx * ticker.deltaTime;
+      l.y += l.vy * ticker.deltaTime;
 
       // Wrap around edges (use line length as margin so it vanishes cleanly)
       if (l.x < -l.length) l.x = width + l.length;
@@ -57,12 +57,13 @@ export function renderLines(
       if (l.y > height + l.length) l.y = -l.length;
 
       l.gfx.clear();
-      l.gfx.lineStyle(1, l.color, 0.65);
-      l.gfx.moveTo(l.x, l.y);
-      l.gfx.lineTo(
-        l.x + Math.cos(l.angle) * l.length,
-        l.y + Math.sin(l.angle) * l.length,
-      );
+      l.gfx
+        .moveTo(l.x, l.y)
+        .lineTo(
+          l.x + Math.cos(l.angle) * l.length,
+          l.y + Math.sin(l.angle) * l.length,
+        )
+        .stroke({ width: 1, color: l.color, alpha: 0.65 });
     }
   });
 }

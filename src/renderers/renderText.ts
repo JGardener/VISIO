@@ -7,10 +7,13 @@ export function renderText(
   width: number,
   height: number,
 ): void {
-  const text = new PIXI.Text(el.content, {
-    fill: el.color,
-    fontSize: el.size,
-    fontFamily: 'Space Mono, monospace',
+  const text = new PIXI.Text({
+    text: el.content,
+    style: {
+      fill: el.color,
+      fontSize: el.size,
+      fontFamily: 'Space Mono, monospace',
+    },
   });
   text.anchor.set(0.5);
   text.x = el.x_pct * width;

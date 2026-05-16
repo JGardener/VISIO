@@ -7,7 +7,7 @@ export function renderCircle(
   el: CircleElement,
   width: number,
   height: number,
-  addTicker: (cb: (delta: number) => void) => void,
+  addTicker: (cb: (ticker: PIXI.Ticker) => void) => void,
 ): void {
   const x = el.x_pct * width;
   const y = el.y_pct * height;
@@ -22,23 +22,19 @@ export function renderCircle(
     ];
     for (const { mult, alpha } of glowLayers) {
       const g = new PIXI.Graphics();
-      g.beginFill(color, alpha * el.alpha);
-      g.drawCircle(x, y, radius * mult);
-      g.endFill();
+      g.circle(x, y, radius * mult).fill({ color, alpha: alpha * el.alpha });
       container.addChild(g);
     }
   }
 
   const gfx = new PIXI.Graphics();
-  gfx.beginFill(color, el.alpha);
-  gfx.drawCircle(x, y, radius);
-  gfx.endFill();
+  gfx.circle(x, y, radius).fill({ color, alpha: el.alpha });
   container.addChild(gfx);
 
   if (el.glow) {
     let phase = 0;
-    addTicker((delta) => {
-      phase += 0.018 * delta;
+    addTicker((ticker) => {
+      phase += 0.018 * ticker.deltaTime;
       gfx.alpha = el.alpha * (0.82 + 0.18 * Math.sin(phase));
     });
   }

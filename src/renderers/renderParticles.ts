@@ -16,7 +16,7 @@ export function renderParticles(
   width: number,
   height: number,
   palette: string[] | null,
-  addTicker: (cb: (delta: number) => void) => void,
+  addTicker: (cb: (ticker: PIXI.Ticker) => void) => void,
 ): void {
   const colors = palette ?? el.colors;
   const particles: Particle[] = [];
@@ -38,9 +38,7 @@ export function renderParticles(
     }
 
     const gfx = new PIXI.Graphics();
-    gfx.beginFill(color);
-    gfx.drawCircle(0, 0, size);
-    gfx.endFill();
+    gfx.circle(0, 0, size).fill({ color });
     gfx.x = Math.random() * width;
     gfx.y = Math.random() * height;
     container.addChild(gfx);
@@ -48,10 +46,10 @@ export function renderParticles(
     particles.push({ gfx, vx, vy, size, phase: Math.random() * Math.PI * 2 });
   }
 
-  addTicker((delta) => {
+  addTicker((ticker) => {
     for (const p of particles) {
-      p.gfx.x += p.vx * delta;
-      p.gfx.y += p.vy * delta;
+      p.gfx.x += p.vx * ticker.deltaTime;
+      p.gfx.y += p.vy * ticker.deltaTime;
 
       // Wrap around edges
       if (p.gfx.x < -p.size) p.gfx.x = width + p.size;
@@ -60,7 +58,7 @@ export function renderParticles(
       if (p.gfx.y > height + p.size) p.gfx.y = -p.size;
 
       if (el.twinkle) {
-        p.phase += 0.05 * delta;
+        p.phase += 0.05 * ticker.deltaTime;
         p.gfx.alpha = 0.4 + 0.6 * Math.abs(Math.sin(p.phase));
       }
     }
