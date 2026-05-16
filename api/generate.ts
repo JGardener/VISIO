@@ -1,7 +1,7 @@
-export const maxDuration = 30;
+export const config = { runtime: 'edge' };
 
 const CLAUDE_MODEL = "claude-sonnet-4-6";
-const MAX_TOKENS = 2048;
+const MAX_TOKENS = 1024;
 const SYSTEM_PROMPT = `You are a visual scene generator for a canvas renderer. Respond with ONLY a valid JSON object — no markdown, no explanation.
 
 STRICT RULES:
@@ -63,61 +63,70 @@ export default async function handler(request: Request): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 25_000);
 
-  let upstream: Response;
   try {
-    upstream = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: MAX_TOKENS,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: prompt }],
-      }),
-      signal: controller.signal,
-    });
-  } catch (err) {
-    clearTimeout(timeoutId);
-    if (err instanceof Error && err.name === "AbortError") {
+    let upstream: Response;
+    try {
+      upstream = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "anthropic-beta": "prompt-caching-2024-07-31",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          model: CLAUDE_MODEL,
+          max_tokens: MAX_TOKENS,
+          system: [
+            {
+              type: "text",
+              text: SYSTEM_PROMPT,
+              cache_control: { type: "ephemeral" },
+            },
+          ],
+          messages: [{ role: "user", content: prompt }],
+        }),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        return Response.json(
+          { error: "Request timed out — try again", code: "server" },
+          { status: 504 },
+        );
+      }
       return Response.json(
-        { error: "Request timed out — try again", code: "server" },
-        { status: 504 },
-      );
-    }
-    return Response.json(
-      { error: "Network error reaching Claude", code: "api" },
-      { status: 502 },
-    );
-  }
-  clearTimeout(timeoutId);
-
-  if (!upstream.ok) {
-    const status = upstream.status;
-    if (status === 401)
-      return Response.json(
-        { error: "Invalid API key", code: "auth" },
-        { status: 401 },
-      );
-    if (status === 429)
-      return Response.json(
-        { error: "Rate limit exceeded — try again shortly", code: "rate" },
-        { status: 429 },
-      );
-    if (status >= 500)
-      return Response.json(
-        { error: "Claude server error — try again", code: "server" },
+        { error: "Network error reaching Claude", code: "api" },
         { status: 502 },
       );
-    return Response.json(
-      { error: `Upstream API error ${status}`, code: "api" },
-      { status },
-    );
-  }
+    }
 
-  const data: unknown = await upstream.json();
-  return Response.json(data);
+    if (!upstream.ok) {
+      const status = upstream.status;
+      if (status === 401)
+        return Response.json(
+          { error: "Invalid API key", code: "auth" },
+          { status: 401 },
+        );
+      if (status === 429)
+        return Response.json(
+          { error: "Rate limit exceeded — try again shortly", code: "rate" },
+          { status: 429 },
+        );
+      if (status >= 500)
+        return Response.json(
+          { error: "Claude server error — try again", code: "server" },
+          { status: 502 },
+        );
+      return Response.json(
+        { error: `Upstream API error ${status}`, code: "api" },
+        { status },
+      );
+    }
+
+    const data: unknown = await upstream.json();
+    return Response.json(data);
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }

@@ -13,16 +13,25 @@ export class VisioError extends Error {
 }
 
 export async function generateScene(prompt: string): Promise<SceneDefinition> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 35_000);
+
   let response: Response;
   try {
     response = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ prompt }),
+      signal: controller.signal,
     });
-  } catch {
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new VisioError('server', 'Request timed out — try again');
+    }
     throw new VisioError('api', 'Network error — check your connection');
   }
+  clearTimeout(timeoutId);
 
   if (!response.ok) {
     let code: ClaudeErrorCode = 'api';
