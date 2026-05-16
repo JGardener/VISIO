@@ -1,13 +1,14 @@
 export const config = { runtime: 'edge' };
 
 const CLAUDE_MODEL = "claude-sonnet-4-6";
-const MAX_TOKENS = 1024;
+const MAX_TOKENS = 2048;
 const SYSTEM_PROMPT = `You are a visual scene generator for a canvas renderer. Respond with ONLY a valid JSON object — no markdown, no explanation.
 
 STRICT RULES:
 - All text content must use plain ASCII only. No emoji, no Unicode symbols.
 - Use "text" elements sparingly — only for labels, titles, or short phrases that add narrative meaning. Never use text to represent a visual concept (e.g. no "🌊" or "☁" for water/clouds).
 - Represent concepts visually using shapes, colors, particles, and composition.
+- Use no more than 10 elements total. Favour quality and composition over quantity.
 
 {
   "background": { "color": "#hexcolor" },
