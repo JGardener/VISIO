@@ -59,6 +59,24 @@ export default function App() {
     renderScene(activeScene, controls.palette?.colors ?? null);
   }, [activeScene, controls.palette, renderScene]);
 
+  // Re-render scene content when window resizes (canvas size changes via resizeTo,
+  // but element positions are computed at render time so need a fresh render)
+  useEffect(() => {
+    if (!activeScene) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        renderScene(activeScene, controls.palette?.colors ?? null);
+      }, 150);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timer);
+    };
+  }, [activeScene, controls.palette, renderScene]);
+
   // Apply speed to PIXI without re-rendering scene objects
   useEffect(() => {
     applyControls(controls.speedMult);
