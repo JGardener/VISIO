@@ -1,3 +1,5 @@
+export const maxDuration = 30;
+
 const CLAUDE_MODEL = 'claude-sonnet-4-6';
 const MAX_TOKENS = 2048;
 const SYSTEM_PROMPT = `You are a creative visual scene generator. When given a scene description, respond with ONLY a valid JSON object:
@@ -37,6 +39,9 @@ export default async function handler(request: Request): Promise<Response> {
     return Response.json({ error: 'Invalid JSON body', code: 'parse' }, { status: 400 });
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 25_000);
+
   let upstream: Response;
   try {
     upstream = await fetch('https://api.anthropic.com/v1/messages', {
@@ -52,10 +57,16 @@ export default async function handler(request: Request): Promise<Response> {
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: prompt }],
       }),
+      signal: controller.signal,
     });
-  } catch {
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === 'AbortError') {
+      return Response.json({ error: 'Request timed out — try again', code: 'server' }, { status: 504 });
+    }
     return Response.json({ error: 'Network error reaching Claude', code: 'api' }, { status: 502 });
   }
+  clearTimeout(timeoutId);
 
   if (!upstream.ok) {
     const status = upstream.status;
