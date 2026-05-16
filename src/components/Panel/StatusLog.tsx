@@ -17,6 +17,7 @@ export default function StatusLog({ loading, error, stepLabel, progress }: Statu
     displayText = error;
   } else if (progress === 100) {
     textClass = styles.successText;
+    displayText = 'Scene ready!';
   }
 
   return (
