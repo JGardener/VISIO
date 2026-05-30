@@ -8,6 +8,7 @@ interface SceneJSONProps {
 }
 
 export default function SceneJSON({ scene }: SceneJSONProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
@@ -23,19 +24,30 @@ export default function SceneJSON({ scene }: SceneJSONProps) {
   return (
     <div className={styles.sceneJson}>
       <div className={styles.jsonHeader}>
-        <span className={styles.label}>Scene JSON</span>
         <button
-          className={`${styles.copyBtn}${copied ? ` ${styles.copied}` : ''}`}
-          onClick={handleCopy}
+          className={styles.toggleBtn}
+          onClick={() => setIsExpanded((v) => !v)}
+          aria-expanded={isExpanded}
         >
-          {copied ? 'COPIED ✓' : 'COPY'}
+          <span className={styles.label}>Scene JSON</span>
+          <span className={styles.chevron}>{isExpanded ? '▲' : '▼'}</span>
         </button>
+        {isExpanded && (
+          <button
+            className={`${styles.copyBtn}${copied ? ` ${styles.copied}` : ''}`}
+            onClick={handleCopy}
+          >
+            {copied ? 'COPIED ✓' : 'COPY'}
+          </button>
+        )}
       </div>
-      <div
-        className={styles.jsonBlock}
-        // syntaxHighlight escapes HTML before wrapping in <span> tags — safe
-        dangerouslySetInnerHTML={{ __html: syntaxHighlight(scene) }}
-      />
+      {isExpanded && (
+        <div
+          className={styles.jsonBlock}
+          // syntaxHighlight escapes HTML before wrapping in <span> tags — safe
+          dangerouslySetInnerHTML={{ __html: syntaxHighlight(scene) }}
+        />
+      )}
     </div>
   );
 }
