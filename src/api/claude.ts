@@ -12,68 +12,15 @@ export class VisioError extends Error {
   }
 }
 
-export async function generateScene(prompt: string): Promise<SceneDefinition> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 35_000);
-
-  let response: Response;
-  try {
-    response = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ prompt }),
-      signal: controller.signal,
-    });
-  } catch (err) {
-    clearTimeout(timeoutId);
-    if (err instanceof Error && err.name === 'AbortError') {
-      throw new VisioError('server', 'Request timed out — try again');
-    }
-    throw new VisioError('api', 'Network error — check your connection');
-  }
-  clearTimeout(timeoutId);
-
-  if (!response.ok) {
-    let code: ClaudeErrorCode = 'api';
-    let message = `API error ${response.status}`;
-    try {
-      const err = (await response.json()) as { error?: string; code?: ClaudeErrorCode };
-      if (err.code) code = err.code;
-      if (err.error) message = err.error;
-    } catch {
-      // ignore — use defaults above
-    }
-    throw new VisioError(code, message);
-  }
-
-  let data: unknown;
-  try {
-    data = await response.json();
-  } catch {
-    throw new VisioError('parse', 'Failed to parse API response');
-  }
-
-  const text =
-    data != null &&
-    typeof data === 'object' &&
-    'content' in data &&
-    Array.isArray((data as { content: unknown[] }).content) &&
-    (data as { content: { text?: string }[] }).content[0]?.text;
-
-  if (!text || typeof text !== 'string') {
-    throw new VisioError('empty', 'Empty response from Claude');
-  }
-
-  // Extract JSON — handle bare JSON, code fences anywhere in the response,
-  // and preamble text Claude sometimes adds for non-standard prompts.
+export function extractAndParseScene(rawText: string): SceneDefinition {
   let jsonText: string;
-  const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  const fenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
   if (fenceMatch) {
     jsonText = fenceMatch[1].trim();
   } else {
-    const start = text.indexOf('{');
-    const end = text.lastIndexOf('}');
-    jsonText = start !== -1 && end > start ? text.slice(start, end + 1) : text.trim();
+    const start = rawText.indexOf('{');
+    const end = rawText.lastIndexOf('}');
+    jsonText = start !== -1 && end > start ? rawText.slice(start, end + 1) : rawText.trim();
   }
 
   let scene: SceneDefinition;
@@ -93,4 +40,67 @@ export async function generateScene(prompt: string): Promise<SceneDefinition> {
   }
 
   return scene;
+}
+
+export async function generateScene(
+  prompt: string,
+  onChunk?: (chunk: string) => void,
+  onStreamClose?: () => void,
+): Promise<SceneDefinition> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 35_000);
+
+  let response: Response;
+  try {
+    response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new VisioError('server', 'Request timed out — try again');
+    }
+    throw new VisioError('api', 'Network error — check your connection');
+  }
+
+  if (!response.ok) {
+    clearTimeout(timeoutId);
+    let code: ClaudeErrorCode = 'api';
+    let message = `API error ${response.status}`;
+    try {
+      const err = (await response.json()) as { error?: string; code?: ClaudeErrorCode };
+      if (err.code) code = err.code;
+      if (err.error) message = err.error;
+    } catch {
+      // ignore — use defaults above
+    }
+    throw new VisioError(code, message);
+  }
+
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      buffer += chunk;
+      onChunk?.(chunk);
+    }
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new VisioError('server', 'Request timed out — try again');
+    }
+    throw new VisioError('parse', 'Stream interrupted');
+  }
+
+  clearTimeout(timeoutId);
+  onStreamClose?.();
+  return extractAndParseScene(buffer);
 }

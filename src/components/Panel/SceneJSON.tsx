@@ -5,9 +5,10 @@ import styles from './SceneJSON.module.scss';
 
 interface SceneJSONProps {
   scene: SceneDefinition | null;
+  streamBuffer?: string;
 }
 
-export default function SceneJSON({ scene }: SceneJSONProps) {
+export default function SceneJSON({ scene, streamBuffer }: SceneJSONProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -19,7 +20,9 @@ export default function SceneJSON({ scene }: SceneJSONProps) {
     });
   }, [scene]);
 
-  if (!scene) return null;
+  const isStreaming = !!streamBuffer;
+
+  if (!scene && !isStreaming) return null;
 
   return (
     <div className={styles.sceneJson}>
@@ -32,7 +35,7 @@ export default function SceneJSON({ scene }: SceneJSONProps) {
           <span className={styles.label}>Scene JSON</span>
           <span className={styles.chevron}>{isExpanded ? '▲' : '▼'}</span>
         </button>
-        {isExpanded && (
+        {isExpanded && scene && !isStreaming && (
           <button
             className={`${styles.copyBtn}${copied ? ` ${styles.copied}` : ''}`}
             onClick={handleCopy}
@@ -42,11 +45,16 @@ export default function SceneJSON({ scene }: SceneJSONProps) {
         )}
       </div>
       {isExpanded && (
-        <div
-          className={styles.jsonBlock}
-          // syntaxHighlight escapes HTML before wrapping in <span> tags — safe
-          dangerouslySetInnerHTML={{ __html: syntaxHighlight(scene) }}
-        />
+        <div className={styles.jsonBlock}>
+          {isStreaming ? (
+            streamBuffer
+          ) : (
+            <span
+              // syntaxHighlight escapes HTML before wrapping in <span> tags — safe
+              dangerouslySetInnerHTML={{ __html: syntaxHighlight(scene!) }}
+            />
+          )}
+        </div>
       )}
     </div>
   );

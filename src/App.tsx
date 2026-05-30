@@ -11,6 +11,7 @@ import {
   HistoryPanel,
   HowItWorksModal,
 } from "@/components";
+import type { AppStatus } from "@/components/Header/Header";
 import { PALETTES, DEFAULT_SCENE } from "@/constants";
 import { slugify } from "@/utils";
 import styles from "./App.module.scss";
@@ -28,7 +29,7 @@ export default function App() {
     clearSelection,
     getRemixPrompt,
   } = useHistory();
-  const { scene, loading, error, stepLabel, progress, generate } =
+  const { scene, loading, error, stepLabel, progress, streamBuffer, generate } =
     useSceneGenerator();
 
   const [prompt, setPrompt] = useState("");
@@ -123,6 +124,14 @@ export default function App() {
     void generate(blendedPrompt);
   }, [getRemixPrompt, clearSelection, generate, setSpeedMult, setPalette]);
 
+  const appStatus: AppStatus = error
+    ? 'error'
+    : loading
+      ? 'streaming'
+      : hasScene
+        ? 'ready'
+        : 'idle';
+
   return (
     <div className={styles.app}>
       <Header
@@ -130,6 +139,7 @@ export default function App() {
         promptSlug={slugify(lastPromptRef.current || "visio")}
         canvasRef={canvasRef}
         onHowItWorks={() => setShowHowItWorks(true)}
+        status={appStatus}
       />
       <main className={styles.main}>
         <SceneCanvas
@@ -157,7 +167,7 @@ export default function App() {
             onRemix={handleRemix}
             onLoad={handleLoad}
           />
-          <SceneJSON scene={activeScene} />
+          <SceneJSON scene={activeScene} streamBuffer={streamBuffer} />
           <StatusLog
             loading={loading}
             error={error}

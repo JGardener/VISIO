@@ -1,14 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { SceneDefinition } from '@/types';
 import { generateScene, VisioError } from '@/api';
-
-const STEPS = [
-  'Contacting Claude API…',
-  'Parsing scene description…',
-  'Generating visual elements…',
-  'Finalising scene composition…',
-  'Rendering…',
-];
 
 export interface SceneGeneratorState {
   scene: SceneDefinition | null;
@@ -16,6 +8,7 @@ export interface SceneGeneratorState {
   error: string | null;
   stepLabel: string;
   progress: number;
+  streamBuffer: string;
 }
 
 export interface UseSceneGeneratorReturn extends SceneGeneratorState {
@@ -29,39 +22,49 @@ export function useSceneGenerator(): UseSceneGeneratorReturn {
     error: null,
     stepLabel: '',
     progress: 0,
+    streamBuffer: '',
   });
 
+  const firstChunkRef = useRef(true);
+
   const generate = useCallback(async (prompt: string) => {
+    firstChunkRef.current = true;
+
     setState({
       scene: null,
       loading: true,
       error: null,
-      stepLabel: STEPS[0],
+      stepLabel: 'Waiting for Claude…',
       progress: 0,
+      streamBuffer: '',
     });
 
-    let stepIdx = 0;
-    const interval = setInterval(() => {
-      stepIdx = Math.min(stepIdx + 1, STEPS.length - 2);
-      setState((prev) => ({
-        ...prev,
-        stepLabel: STEPS[stepIdx],
-        progress: Math.round((stepIdx / (STEPS.length - 1)) * 85),
-      }));
-    }, 900);
+    const onChunk = (chunk: string) => {
+      setState((prev) => {
+        const newBuffer = prev.streamBuffer + chunk;
+        if (firstChunkRef.current) {
+          firstChunkRef.current = false;
+          return { ...prev, stepLabel: 'Streaming…', progress: 40, streamBuffer: newBuffer };
+        }
+        return { ...prev, streamBuffer: newBuffer };
+      });
+    };
+
+    const onStreamClose = () => {
+      setState((prev) => ({ ...prev, stepLabel: 'Rendering…', progress: 85 }));
+    };
 
     try {
-      const scene = await generateScene(prompt);
-      clearInterval(interval);
+      const scene = await generateScene(prompt, onChunk, onStreamClose);
       setState({
         scene,
         loading: false,
         error: null,
-        stepLabel: STEPS[STEPS.length - 1],
+        stepLabel: 'Scene ready',
         progress: 100,
+        streamBuffer: '',
       });
     } catch (err) {
-      clearInterval(interval);
       const msg = err instanceof VisioError ? err.message : 'Something went wrong';
       setState((prev) => ({
         ...prev,
@@ -70,6 +73,7 @@ export function useSceneGenerator(): UseSceneGeneratorReturn {
         error: msg,
         stepLabel: '',
         progress: 0,
+        streamBuffer: '',
       }));
     }
   }, []);

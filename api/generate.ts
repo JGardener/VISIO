@@ -28,6 +28,11 @@ Example — "a calm ocean at night":
 BAD: { type: "text", content: "🌊🌊🌊" }
 GOOD: deep blue background + slow upward particles in blue/teal + large low-opacity circle for a moon`;
 
+type SseEvent = {
+  type: string;
+  delta?: { type: string; text: string };
+};
+
 export default async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {
     return Response.json(
@@ -64,70 +69,105 @@ export default async function handler(request: Request): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 25_000);
 
+  let upstream: Response;
   try {
-    let upstream: Response;
-    try {
-      upstream = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "anthropic-beta": "prompt-caching-2024-07-31",
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          model: CLAUDE_MODEL,
-          max_tokens: MAX_TOKENS,
-          system: [
-            {
-              type: "text",
-              text: SYSTEM_PROMPT,
-              cache_control: { type: "ephemeral" },
-            },
-          ],
-          messages: [{ role: "user", content: prompt }],
-        }),
-        signal: controller.signal,
-      });
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") {
-        return Response.json(
-          { error: "Request timed out — try again", code: "server" },
-          { status: 504 },
-        );
-      }
+    upstream = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-beta": "prompt-caching-2024-07-31",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: CLAUDE_MODEL,
+        max_tokens: MAX_TOKENS,
+        stream: true,
+        system: [
+          {
+            type: "text",
+            text: SYSTEM_PROMPT,
+            cache_control: { type: "ephemeral" },
+          },
+        ],
+        messages: [{ role: "user", content: prompt }],
+      }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === "AbortError") {
       return Response.json(
-        { error: "Network error reaching Claude", code: "api" },
+        { error: "Request timed out — try again", code: "server" },
+        { status: 504 },
+      );
+    }
+    return Response.json(
+      { error: "Network error reaching Claude", code: "api" },
+      { status: 502 },
+    );
+  }
+
+  if (!upstream.ok) {
+    clearTimeout(timeoutId);
+    const status = upstream.status;
+    if (status === 401)
+      return Response.json(
+        { error: "Invalid API key", code: "auth" },
+        { status: 401 },
+      );
+    if (status === 429)
+      return Response.json(
+        { error: "Rate limit exceeded — try again shortly", code: "rate" },
+        { status: 429 },
+      );
+    if (status >= 500)
+      return Response.json(
+        { error: "Claude server error — try again", code: "server" },
         { status: 502 },
       );
-    }
-
-    if (!upstream.ok) {
-      const status = upstream.status;
-      if (status === 401)
-        return Response.json(
-          { error: "Invalid API key", code: "auth" },
-          { status: 401 },
-        );
-      if (status === 429)
-        return Response.json(
-          { error: "Rate limit exceeded — try again shortly", code: "rate" },
-          { status: 429 },
-        );
-      if (status >= 500)
-        return Response.json(
-          { error: "Claude server error — try again", code: "server" },
-          { status: 502 },
-        );
-      return Response.json(
-        { error: `Upstream API error ${status}`, code: "api" },
-        { status },
-      );
-    }
-
-    const data: unknown = await upstream.json();
-    return Response.json(data);
-  } finally {
-    clearTimeout(timeoutId);
+    return Response.json(
+      { error: `Upstream API error ${status}`, code: "api" },
+      { status },
+    );
   }
+
+  // Parse SSE from Anthropic and pipe only text_delta content as plain text
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      const reader = upstream.body!.getReader();
+      let lineBuffer = '';
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          lineBuffer += decoder.decode(value, { stream: true });
+          const lines = lineBuffer.split('\n');
+          lineBuffer = lines.pop() ?? '';
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') continue;
+            try {
+              const event = JSON.parse(data) as SseEvent;
+              if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+                controller.enqueue(encoder.encode(event.delta.text));
+              }
+            } catch { /* ignore malformed SSE lines */ }
+          }
+        }
+      } catch {
+        // upstream read error — close stream, client will surface it
+      } finally {
+        clearTimeout(timeoutId);
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  });
 }

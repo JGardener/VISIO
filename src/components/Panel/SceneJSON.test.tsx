@@ -14,6 +14,23 @@ describe('SceneJSON', () => {
     expect(screen.getByRole('button', { name: /scene json/i })).toBeInTheDocument();
   });
 
+  it('renders when only a streamBuffer is provided (no scene yet)', () => {
+    render(<SceneJSON scene={null} streamBuffer='{"background":' />);
+    expect(screen.getByRole('button', { name: /scene json/i })).toBeInTheDocument();
+  });
+
+  it('shows raw stream text when expanded during streaming', async () => {
+    render(<SceneJSON scene={null} streamBuffer='{"background":{"color":"#000"' />);
+    await userEvent.click(screen.getByRole('button', { name: /scene json/i }));
+    expect(screen.getByText(/\{"background":/)).toBeInTheDocument();
+  });
+
+  it('hides the copy button while streaming', async () => {
+    render(<SceneJSON scene={null} streamBuffer='partial json' />);
+    await userEvent.click(screen.getByRole('button', { name: /scene json/i }));
+    expect(screen.queryByRole('button', { name: /copy/i })).not.toBeInTheDocument();
+  });
+
   it('is collapsed by default — JSON content not rendered', () => {
     render(<SceneJSON scene={mockScene} />);
     expect(screen.queryByRole('button', { name: /copy/i })).not.toBeInTheDocument();

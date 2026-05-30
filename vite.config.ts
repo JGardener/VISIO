@@ -28,9 +28,19 @@ export default defineConfig(({ mode }) => {
               const mod = await server.ssrLoadModule('/api/generate.ts');
               const response = await (mod.default as (r: Request) => Promise<Response>)(request);
 
-              const text = await response.text();
-              res.writeHead(response.status, { 'Content-Type': 'application/json' });
-              res.end(text);
+              const contentType = response.headers.get('Content-Type') ?? 'text/plain';
+              res.writeHead(response.status, { 'Content-Type': contentType });
+              if (response.body) {
+                const reader = response.body.getReader();
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  res.write(value);
+                }
+                res.end();
+              } else {
+                res.end();
+              }
             } catch {
               res.writeHead(500, { 'Content-Type': 'application/json' });
               res.end(JSON.stringify({ error: 'Dev server error', code: 'api' }));

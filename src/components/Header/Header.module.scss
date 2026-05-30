@@ -48,12 +48,31 @@
   }
 }
 
-.statusDot {
+%dot-base {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--accent);
-  animation: pulse 2s ease-in-out infinite;
+}
+
+.statusDotIdle {
+  @extend %dot-base;
+  background: #666;
+}
+
+.statusDotStreaming {
+  @extend %dot-base;
+  background: #f5a623;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.statusDotReady {
+  @extend %dot-base;
+  background: #4caf50;
+}
+
+.statusDotError {
+  @extend %dot-base;
+  background: #e53935;
 }
 
 @keyframes pulse {
