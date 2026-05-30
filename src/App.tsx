@@ -11,7 +11,7 @@ import {
   HistoryPanel,
   HowItWorksModal,
 } from "@/components";
-import { PALETTES } from "@/constants";
+import { PALETTES, DEFAULT_SCENE } from "@/constants";
 import { slugify } from "@/utils";
 import styles from "./App.module.scss";
 
@@ -41,7 +41,7 @@ export default function App() {
   // Using state ensures the render effect always has the correct scene when
   // palette changes, eliminating the race where setPalette would trigger the
   // effect with the generator's old scene rather than the loaded entry's scene.
-  const [activeScene, setActiveScene] = useState<SceneDefinition | null>(null);
+  const [activeScene, setActiveScene] = useState<SceneDefinition | null>(DEFAULT_SCENE);
 
   const lastPromptRef = useRef("");
 
@@ -101,6 +101,17 @@ export default function App() {
     [setSpeedMult, setPalette],
   );
 
+  const handleChipSelect = useCallback(
+    (chipPrompt: string) => {
+      setPrompt(chipPrompt);
+      lastPromptRef.current = chipPrompt;
+      setSpeedMult(1);
+      setPalette(PALETTES[0]);
+      void generate(chipPrompt);
+    },
+    [generate, setSpeedMult, setPalette],
+  );
+
   const handleRemix = useCallback(() => {
     const blendedPrompt = getRemixPrompt();
     if (!blendedPrompt) return;
@@ -134,6 +145,7 @@ export default function App() {
             value={prompt}
             onChange={setPrompt}
             onGenerate={handleGenerate}
+            onChipSelect={handleChipSelect}
             loading={loading}
           />
           <HistoryPanel
