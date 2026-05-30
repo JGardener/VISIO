@@ -116,7 +116,7 @@ export function usePixi(
             renderParticles(app.stage, el, width, height, palette, addTicker);
             break;
           case 'circle':
-            renderCircle(app.stage, el, width, height, addTicker);
+            renderCircle(app.stage, el, width, height, palette, addTicker);
             break;
           case 'orbits':
             renderOrbits(app.stage, el, width, height, addTicker);

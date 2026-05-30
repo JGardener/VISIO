@@ -31,12 +31,17 @@ export function renderLines(
     const color = hexColor(colors[Math.floor(Math.random() * colors.length)]);
 
     const gfx = new PIXI.Graphics();
+    // Draw once in local space from origin; position/rotation handles placement
+    gfx.moveTo(0, 0).lineTo(length, 0).stroke({ width: 1, color, alpha: 0.65 });
+    gfx.x = Math.random() * width;
+    gfx.y = Math.random() * height;
+    gfx.rotation = angle;
     container.addChild(gfx);
 
     lines.push({
       gfx,
-      x: Math.random() * width,
-      y: Math.random() * height,
+      x: gfx.x,
+      y: gfx.y,
       angle,
       length,
       vx: Math.cos(angle) * driftSpeed,
@@ -56,14 +61,8 @@ export function renderLines(
       if (l.y < -l.length) l.y = height + l.length;
       if (l.y > height + l.length) l.y = -l.length;
 
-      l.gfx.clear();
-      l.gfx
-        .moveTo(l.x, l.y)
-        .lineTo(
-          l.x + Math.cos(l.angle) * l.length,
-          l.y + Math.sin(l.angle) * l.length,
-        )
-        .stroke({ width: 1, color: l.color, alpha: 0.65 });
+      l.gfx.x = l.x;
+      l.gfx.y = l.y;
     }
   });
 }

@@ -16,4 +16,11 @@ describe('SYSTEM_PROMPT', () => {
   it('trail schema includes trail_length', () => {
     expect(SYSTEM_PROMPT).toContain('trail_length');
   });
+
+  it('particles direction schema includes down, left, and right', () => {
+    const particlesLine = SYSTEM_PROMPT.split('\n').find((l) => l.startsWith('- particles:'));
+    expect(particlesLine).toContain('"down"');
+    expect(particlesLine).toContain('"left"');
+    expect(particlesLine).toContain('"right"');
+  });
 });

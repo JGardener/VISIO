@@ -6,7 +6,7 @@ export interface ParticlesElement {
   colors: string[];
   size: { min: number; max: number };
   speed: number;
-  direction: 'random' | 'up';
+  direction: 'random' | 'up' | 'down' | 'left' | 'right';
   twinkle: boolean;
 }
 

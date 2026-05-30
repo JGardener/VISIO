@@ -37,6 +37,14 @@ export function renderOrbits(
     starGlow.alpha = 0.7 + 0.3 * Math.sin(starPhase);
   });
 
+  // Faint orbit path rings
+  for (const body of el.bodies) {
+    const orbitRadius = body.orbit_radius_pct * width;
+    const ring = new PIXI.Graphics();
+    ring.circle(cx, cy, orbitRadius).stroke({ width: 1, color: 0xffffff, alpha: 0.08 });
+    container.addChild(ring);
+  }
+
   // Orbiting bodies
   const animatedBodies: AnimatedBody[] = [];
 

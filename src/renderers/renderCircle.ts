@@ -7,12 +7,13 @@ export function renderCircle(
   el: CircleElement,
   width: number,
   height: number,
+  palette: string[] | null,
   addTicker: (cb: (ticker: PIXI.Ticker) => void) => void,
 ): void {
   const x = el.x_pct * width;
   const y = el.y_pct * height;
   const radius = el.radius_pct * width;
-  const color = hexColor(el.color);
+  const color = hexColor(palette ? palette[0] : el.color);
 
   if (el.glow) {
     const glowLayers: Array<{ mult: number; alpha: number }> = [
