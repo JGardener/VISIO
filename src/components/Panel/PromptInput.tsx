@@ -5,10 +5,11 @@ interface PromptInputProps {
   value: string;
   onChange: (v: string) => void;
   onGenerate: () => void;
+  onChipSelect: (prompt: string) => void;
   loading: boolean;
 }
 
-export default function PromptInput({ value, onChange, onGenerate, loading }: PromptInputProps) {
+export default function PromptInput({ value, onChange, onGenerate, onChipSelect, loading }: PromptInputProps) {
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !loading) {
       onGenerate();
@@ -27,7 +28,7 @@ export default function PromptInput({ value, onChange, onGenerate, loading }: Pr
       />
       <div className={styles.chips}>
         {SUGGESTION_PROMPTS.map((p) => (
-          <button key={p} className={styles.chip} onClick={() => onChange(p)}>
+          <button key={p} className={styles.chip} onClick={() => onChipSelect(p)} disabled={loading}>
             {p}
           </button>
         ))}
