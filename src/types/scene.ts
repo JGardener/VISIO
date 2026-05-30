@@ -1,4 +1,4 @@
-export type ElementType = 'particles' | 'circle' | 'orbits' | 'lines' | 'text';
+export type ElementType = 'particles' | 'circle' | 'orbits' | 'lines' | 'text' | 'wave' | 'trail';
 
 export interface ParticlesElement {
   type: 'particles';
@@ -52,12 +52,34 @@ export interface TextElement {
   y_pct: number;
 }
 
+export interface WaveElement {
+  type: 'wave';
+  colors: string[];
+  amplitude_pct: number;
+  frequency: number;
+  speed: number;
+  count: number;
+  alpha: number;
+}
+
+export interface TrailElement {
+  type: 'trail';
+  count: number;
+  colors: string[];
+  speed: number;
+  direction: 'random' | 'up' | 'down' | 'left' | 'right';
+  trail_length: number;
+  size: { min: number; max: number };
+}
+
 export type SceneElement =
   | ParticlesElement
   | CircleElement
   | OrbitsElement
   | LinesElement
-  | TextElement;
+  | TextElement
+  | WaveElement
+  | TrailElement;
 
 export interface SceneDefinition {
   background: { color: string };

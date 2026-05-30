@@ -8,6 +8,8 @@ import {
   renderOrbits,
   renderLines,
   renderText,
+  renderWave,
+  renderTrail,
 } from '@/renderers';
 
 type TickerCb = (ticker: PIXI.Ticker) => void;
@@ -124,6 +126,12 @@ export function usePixi(
             break;
           case 'text':
             renderText(app.stage, el, width, height);
+            break;
+          case 'wave':
+            renderWave(app.stage, el, width, height, palette, addTicker);
+            break;
+          case 'trail':
+            renderTrail(app.stage, el, width, height, palette, addTicker);
             break;
         }
       }
