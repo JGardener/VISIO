@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import type { SceneDefinition } from '@/types';
-import { generateScene, VisioError } from '@/api';
+import { generateScene, getErrorMessage, VisioError } from '@/api';
 
 export interface SceneGeneratorState {
   scene: SceneDefinition | null;
@@ -70,7 +70,7 @@ export function useSceneGenerator(): UseSceneGeneratorReturn {
         streamBuffer: '',
       });
     } catch (err) {
-      const msg = err instanceof VisioError ? err.message : 'Something went wrong';
+      const msg = err instanceof VisioError ? getErrorMessage(err.code) : 'Something went wrong';
       setState((prev) => ({
         ...prev,
         scene: null,

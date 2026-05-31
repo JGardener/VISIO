@@ -12,6 +12,19 @@ export class VisioError extends Error {
   }
 }
 
+const ERROR_MESSAGES: Record<ClaudeErrorCode, string> = {
+  auth: 'Invalid API key — check your environment config',
+  rate: 'Rate limit hit — wait a moment and try again',
+  server: 'Claude is unavailable — try again shortly',
+  parse: "Couldn't read the scene — try rephrasing your prompt",
+  api: 'Something went wrong — check your connection and try again',
+  empty: 'Something went wrong — check your connection and try again',
+};
+
+export function getErrorMessage(code: ClaudeErrorCode): string {
+  return ERROR_MESSAGES[code];
+}
+
 export function extractAndParseScene(rawText: string): SceneDefinition {
   let jsonText: string;
   const fenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);

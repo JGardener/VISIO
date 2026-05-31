@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { extractAndParseScene, generateScene, VisioError } from './claude';
+import { extractAndParseScene, generateScene, VisioError, getErrorMessage } from './claude';
 
 const MINIMAL_SCENE = { background: { color: '#000000' }, elements: [] };
 const MINIMAL_JSON = JSON.stringify(MINIMAL_SCENE);
@@ -36,6 +36,32 @@ describe('extractAndParseScene', () => {
       expect(e).toBeInstanceOf(VisioError);
       expect((e as VisioError).code).toBe('parse');
     }
+  });
+});
+
+describe('getErrorMessage', () => {
+  it('maps auth to an actionable API key message', () => {
+    expect(getErrorMessage('auth')).toBe('Invalid API key — check your environment config');
+  });
+
+  it('maps rate to a wait message', () => {
+    expect(getErrorMessage('rate')).toBe('Rate limit hit — wait a moment and try again');
+  });
+
+  it('maps server to an unavailability message', () => {
+    expect(getErrorMessage('server')).toBe('Claude is unavailable — try again shortly');
+  });
+
+  it('maps parse to a rephrasing suggestion', () => {
+    expect(getErrorMessage('parse')).toBe("Couldn't read the scene — try rephrasing your prompt");
+  });
+
+  it('maps api to a generic connection message', () => {
+    expect(getErrorMessage('api')).toBe('Something went wrong — check your connection and try again');
+  });
+
+  it('maps empty to the same generic connection message as api', () => {
+    expect(getErrorMessage('empty')).toBe('Something went wrong — check your connection and try again');
   });
 });
 

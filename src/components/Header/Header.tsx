@@ -18,6 +18,13 @@ const STATUS_CLASS: Record<AppStatus, string> = {
   error: styles.statusDotError,
 };
 
+const STATUS_TITLE: Record<AppStatus, string> = {
+  idle: 'Idle',
+  streaming: 'Generating…',
+  ready: 'Ready',
+  error: 'Error',
+};
+
 export default function Header({ hasScene, promptSlug, canvasRef, onHowItWorks, status }: HeaderProps) {
   function handleExport() {
     const canvas = canvasRef.current;
@@ -32,12 +39,12 @@ export default function Header({ hasScene, promptSlug, canvasRef, onHowItWorks, 
       </div>
       <div className={styles.actions}>
         <button className={styles.btn} onClick={onHowItWorks}>
-          ? How It Works
+          How It Works
         </button>
         <button className={styles.btn} disabled={!hasScene} onClick={handleExport}>
           ⬇ Export PNG
         </button>
-        <div className={STATUS_CLASS[status]} />
+        <div className={STATUS_CLASS[status]} title={STATUS_TITLE[status]} />
       </div>
     </header>
   );
