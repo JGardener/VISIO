@@ -5,16 +5,22 @@ interface PromptInputProps {
   value: string;
   onChange: (v: string) => void;
   onGenerate: () => void;
+  onRefine: () => void;
   onChipSelect: (prompt: string) => void;
   loading: boolean;
+  hasScene: boolean;
 }
 
-export default function PromptInput({ value, onChange, onGenerate, onChipSelect, loading }: PromptInputProps) {
+export default function PromptInput({ value, onChange, onGenerate, onRefine, onChipSelect, loading, hasScene }: PromptInputProps) {
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !loading) {
-      onGenerate();
+      hasScene ? onRefine() : onGenerate();
     }
   }
+
+  const placeholder = hasScene
+    ? "Refine: 'add a comet', 'make it darker', 'add a storm'…"
+    : "Describe a scene… (Cmd+Enter to generate)";
 
   return (
     <div className={styles.section}>
@@ -23,7 +29,7 @@ export default function PromptInput({ value, onChange, onGenerate, onChipSelect,
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Describe a scene… (Cmd+Enter to generate)"
+        placeholder={placeholder}
         disabled={loading}
       />
       <div className={styles.chips}>
@@ -33,13 +39,32 @@ export default function PromptInput({ value, onChange, onGenerate, onChipSelect,
           </button>
         ))}
       </div>
-      <button
-        className={styles.generateBtn}
-        onClick={onGenerate}
-        disabled={loading || !value.trim()}
-      >
-        {loading ? 'Generating…' : 'Generate Scene'}
-      </button>
+      {hasScene ? (
+        <div className={styles.actionButtons}>
+          <button
+            className={styles.refineBtn}
+            onClick={onRefine}
+            disabled={loading || !value.trim()}
+          >
+            Refine Scene
+          </button>
+          <button
+            className={styles.newSceneBtn}
+            onClick={onGenerate}
+            disabled={loading}
+          >
+            New Scene
+          </button>
+        </div>
+      ) : (
+        <button
+          className={styles.generateBtn}
+          onClick={onGenerate}
+          disabled={loading || !value.trim()}
+        >
+          Generate Scene
+        </button>
+      )}
     </div>
   );
 }

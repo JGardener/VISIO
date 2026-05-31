@@ -71,3 +71,54 @@
     cursor: default;
   }
 }
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.refineBtn {
+  flex: 1;
+  padding: 13px;
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: $font-mono;
+  font-size: 13px;
+  transition: background 0.15s;
+
+  &:disabled {
+    background: var(--muted);
+    cursor: default;
+  }
+}
+
+.newSceneBtn {
+  padding: 13px 16px;
+  background: transparent;
+  color: var(--text-dim);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: $font-mono;
+  font-size: 13px;
+  transition: border-color 0.15s, color 0.15s;
+
+  &:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}

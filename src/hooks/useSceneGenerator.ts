@@ -11,8 +11,12 @@ export interface SceneGeneratorState {
   streamBuffer: string;
 }
 
+export type SceneMode = 'generate' | 'refine';
+
 export interface UseSceneGeneratorReturn extends SceneGeneratorState {
-  generate: (prompt: string) => Promise<void>;
+  generate: (prompt: string, currentScene?: SceneDefinition) => Promise<void>;
+  mode: SceneMode;
+  setMode: (mode: SceneMode) => void;
 }
 
 export function useSceneGenerator(): UseSceneGeneratorReturn {
@@ -24,10 +28,11 @@ export function useSceneGenerator(): UseSceneGeneratorReturn {
     progress: 0,
     streamBuffer: '',
   });
+  const [mode, setMode] = useState<SceneMode>('generate');
 
   const firstChunkRef = useRef(true);
 
-  const generate = useCallback(async (prompt: string) => {
+  const generate = useCallback(async (prompt: string, currentScene?: SceneDefinition) => {
     firstChunkRef.current = true;
 
     setState({
@@ -55,7 +60,7 @@ export function useSceneGenerator(): UseSceneGeneratorReturn {
     };
 
     try {
-      const scene = await generateScene(prompt, onChunk, onStreamClose);
+      const scene = await generateScene(prompt, currentScene, onChunk, onStreamClose);
       setState({
         scene,
         loading: false,
@@ -78,5 +83,5 @@ export function useSceneGenerator(): UseSceneGeneratorReturn {
     }
   }, []);
 
-  return { ...state, generate };
+  return { ...state, generate, mode, setMode };
 }

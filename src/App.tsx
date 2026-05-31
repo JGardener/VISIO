@@ -29,7 +29,7 @@ export default function App() {
     clearSelection,
     getRemixPrompt,
   } = useHistory();
-  const { scene, loading, error, stepLabel, progress, streamBuffer, generate } =
+  const { scene, loading, error, stepLabel, progress, streamBuffer, generate, mode, setMode } =
     useSceneGenerator();
 
   const [prompt, setPrompt] = useState("");
@@ -87,8 +87,18 @@ export default function App() {
     lastPromptRef.current = prompt;
     setSpeedMult(1);
     setPalette(PALETTES[0]);
+    setMode('generate');
     void generate(prompt);
-  }, [generate, prompt, setSpeedMult, setPalette]);
+  }, [generate, prompt, setSpeedMult, setPalette, setMode]);
+
+  const handleRefine = useCallback(() => {
+    if (!activeScene) return;
+    lastPromptRef.current = prompt;
+    setSpeedMult(1);
+    setPalette(PALETTES[0]);
+    setMode('refine');
+    void generate(prompt, activeScene);
+  }, [generate, prompt, activeScene, setSpeedMult, setPalette, setMode]);
 
   const handleLoad = useCallback(
     (entry: HistoryEntry) => {
@@ -155,8 +165,10 @@ export default function App() {
             value={prompt}
             onChange={setPrompt}
             onGenerate={handleGenerate}
+            onRefine={handleRefine}
             onChipSelect={handleChipSelect}
             loading={loading}
+            hasScene={hasScene}
           />
           <HistoryPanel
             history={history}

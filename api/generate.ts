@@ -50,8 +50,9 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   let prompt: string;
+  let currentScene: unknown;
   try {
-    const body = (await request.json()) as { prompt?: unknown };
+    const body = (await request.json()) as { prompt?: unknown; currentScene?: unknown };
     if (!body.prompt || typeof body.prompt !== "string") {
       return Response.json(
         { error: "prompt must be a non-empty string", code: "parse" },
@@ -59,6 +60,7 @@ export default async function handler(request: Request): Promise<Response> {
       );
     }
     prompt = body.prompt;
+    currentScene = body.currentScene;
   } catch {
     return Response.json(
       { error: "Invalid JSON body", code: "parse" },
@@ -90,7 +92,13 @@ export default async function handler(request: Request): Promise<Response> {
             cache_control: { type: "ephemeral" },
           },
         ],
-        messages: [{ role: "user", content: prompt }],
+        messages: currentScene
+          ? [
+              { role: "user", content: JSON.stringify(currentScene) },
+              { role: "assistant", content: JSON.stringify(currentScene) },
+              { role: "user", content: prompt },
+            ]
+          : [{ role: "user", content: prompt }],
       }),
       signal: controller.signal,
     });

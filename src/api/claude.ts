@@ -44,18 +44,22 @@ export function extractAndParseScene(rawText: string): SceneDefinition {
 
 export async function generateScene(
   prompt: string,
+  currentScene?: SceneDefinition,
   onChunk?: (chunk: string) => void,
   onStreamClose?: () => void,
 ): Promise<SceneDefinition> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 35_000);
 
+  const bodyPayload: { prompt: string; currentScene?: SceneDefinition } = { prompt };
+  if (currentScene !== undefined) bodyPayload.currentScene = currentScene;
+
   let response: Response;
   try {
     response = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify(bodyPayload),
       signal: controller.signal,
     });
   } catch (err) {
