@@ -29,7 +29,7 @@ export default function App() {
     clearSelection,
     getRemixPrompt,
   } = useHistory();
-  const { scene, loading, error, stepLabel, progress, streamBuffer, generate, mode, setMode } =
+  const { scene, loading, error, stepLabel, progress, streamBuffer, generate, setMode } =
     useSceneGenerator();
 
   const [prompt, setPrompt] = useState("");

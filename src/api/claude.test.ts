@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { extractAndParseScene, generateScene, VisioError } from './claude';
-import type { SceneDefinition } from '@/types';
 
 const MINIMAL_SCENE = { background: { color: '#000000' }, elements: [] };
 const MINIMAL_JSON = JSON.stringify(MINIMAL_SCENE);
