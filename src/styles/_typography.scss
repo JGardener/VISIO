@@ -1,11 +1,13 @@
 @use './variables' as *;
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@600;700;800&display=swap');
 
 body {
-  font-family: $font-mono;
+  font-family: $font-sans;
   color: var(--text);
   background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 h1,
@@ -15,4 +17,9 @@ h4,
 h5,
 h6 {
   font-family: $font-display;
+}
+
+code,
+pre {
+  font-family: $font-mono;
 }

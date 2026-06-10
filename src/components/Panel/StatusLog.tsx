@@ -17,19 +17,25 @@ export default function StatusLog({ loading, error, stepLabel, progress }: Statu
     displayText = error;
   } else if (progress === 100) {
     textClass = styles.successText;
-    displayText = 'Scene ready!';
+    displayText = 'Scene ready';
+  } else if (isIdle) {
+    displayText = 'Enter to generate · Shift+Enter for a new line';
   }
 
   return (
     <div className={styles.statusLog}>
-      <div className={styles.progressTrack}>
+      <div className={styles.progressTrack} aria-hidden="true">
         <div
           className={styles.progressBar}
-          style={{ width: `${progress}%`, opacity: isIdle ? 0 : 1 }}
+          style={{ width: `${progress}%`, opacity: loading ? 1 : 0 }}
         />
       </div>
-      <div className={`${styles.logRow}${textClass ? ` ${textClass}` : ''}`}>
-        {loading && <div className={styles.spinner} />}
+      <div
+        className={`${styles.logRow}${textClass ? ` ${textClass}` : ''}${isIdle ? ` ${styles.hint}` : ''}`}
+        role={error ? 'alert' : 'status'}
+        aria-live={error ? 'assertive' : 'polite'}
+      >
+        {loading && <span className={styles.spinner} aria-hidden="true" />}
         <span>{displayText}</span>
       </div>
     </div>

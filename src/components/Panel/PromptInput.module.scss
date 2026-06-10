@@ -1,124 +1,226 @@
-.section {
-  padding: 20px;
-  border-bottom: 1px solid var(--border);
+.dock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.modeRow {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 2px;
+  background: var(--surface-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 3px;
+}
+
+.modeBtn {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: $font-sans;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  &:hover:not(:disabled) {
+    color: var(--text);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  @include focus-ring;
+}
+
+.modeActive {
+  background: var(--accent-soft);
+  color: var(--accent);
+
+  &:hover:not(:disabled) {
+    color: var(--accent);
+  }
+}
+
+.inputRow {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+
+  @include mobile {
+    flex-direction: column;
+  }
 }
 
 .textarea {
-  width: 100%;
-  height: 90px;
-  background: var(--bg);
+  flex: 1;
+  min-height: 58px;
+  max-height: 120px;
+  background: var(--surface-input);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   color: var(--text);
-  font-size: 14px;
-  font-family: $font-mono;
-  padding: 10px;
+  font-size: 14.5px;
+  font-family: $font-sans;
+  line-height: 1.45;
+  padding: 10px 14px;
   resize: none;
   outline: none;
-  transition: border-color 0.15s;
-  display: block;
+  transition: border-color var(--dur-fast) var(--ease-out);
 
-  &:focus {
-    border-color: var(--accent);
+  &:focus-visible {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 1px var(--accent2);
   }
 
   &::placeholder {
-    color: var(--text-dim);
+    color: var(--text-faint);
   }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+
+  @include mobile {
+    font-size: 16px; // prevents iOS zoom-on-focus
+    min-height: 52px;
+  }
+}
+
+.submitBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 22px;
+  min-width: 124px;
+  min-height: 44px;
+  background: var(--accent-grad);
+  color: var(--on-accent);
+  font-family: $font-sans;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(0, 255, 163, 0.3);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  @include focus-ring;
+
+  @include mobile {
+    width: 100%;
+    min-height: 48px;
+  }
+}
+
+.chipsRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  animation: chipsIn var(--dur-med) var(--ease-out) both;
+
+  @include mobile {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+@keyframes chipsIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chipsLabel {
+  font-family: $font-mono;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  flex-shrink: 0;
 }
 
 .chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin: 10px 0;
+
+  @include mobile {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }
 
 .chip {
   font-size: 12px;
-  padding: 5px 12px;
+  font-family: $font-sans;
+  font-weight: 500;
+  padding: 6px 12px;
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--text-dim);
   cursor: pointer;
-  font-family: $font-mono;
-  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: var(--accent);
     color: var(--accent);
-  }
-}
-
-.generateBtn {
-  width: 100%;
-  padding: 13px;
-  background: var(--accent);
-  color: #000;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: $font-mono;
-  font-size: 13px;
-  transition: background 0.15s;
-
-  &:disabled {
-    background: var(--muted);
-    cursor: default;
-  }
-}
-
-.actionButtons {
-  display: flex;
-  gap: 8px;
-}
-
-.refineBtn {
-  flex: 1;
-  padding: 13px;
-  background: var(--accent);
-  color: #000;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: $font-mono;
-  font-size: 13px;
-  transition: background 0.15s;
-
-  &:disabled {
-    background: var(--muted);
-    cursor: default;
-  }
-}
-
-.newSceneBtn {
-  padding: 13px 16px;
-  background: transparent;
-  color: var(--text-dim);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: $font-mono;
-  font-size: 13px;
-  transition: border-color 0.15s, color 0.15s;
-
-  &:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+    background: var(--accent-soft);
   }
 
   &:disabled {
     opacity: 0.4;
     cursor: default;
+  }
+
+  @include focus-ring;
+
+  @include mobile {
+    min-height: 36px;
   }
 }

@@ -2,44 +2,129 @@
   position: absolute;
   inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+  // Keep the hero clear of the prompt dock at the bottom
+  padding: 72px 24px 280px;
   pointer-events: none;
+  z-index: 5;
   opacity: 1;
-  transition: opacity 0.4s ease;
-  text-align: center;
-  padding: 20px;
+  transition: opacity var(--dur-slow) var(--ease-out);
+
+  &.hidden {
+    opacity: 0;
+  }
 
   @include mobile {
-    display: none;
+    padding: 64px 20px 300px;
+  }
+
+  @include short-viewport {
+    padding-bottom: 220px;
   }
 }
 
-.hidden {
-  opacity: 0;
+.hero {
+  max-width: 700px;
+  text-align: center;
+  animation: heroIn var(--dur-slow) var(--ease-out) both;
+  animation-delay: 120ms;
+}
+
+@keyframes heroIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.eyebrow {
+  font-family: $font-mono;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
 }
 
 .title {
   font-family: $font-display;
-  font-size: 18px;
-  font-weight: 700;
+  font-weight: 800;
+  font-size: clamp(28px, 5vw, 42px);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
   color: var(--text);
-  margin-bottom: 6px;
+  text-shadow: 0 4px 32px rgba(0, 0, 0, 0.6);
+}
+
+.titleAccent {
+  background: var(--accent-grad);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  white-space: nowrap;
+
+  @include mobile {
+    white-space: normal;
+  }
 }
 
 .subtitle {
-  font-size: 12px;
+  margin-top: 16px;
+  font-size: 15px;
+  line-height: 1.6;
   color: var(--text-dim);
-  margin-bottom: 32px;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.8);
+
+  @include mobile {
+    font-size: 14px;
+  }
 }
 
 .steps {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 28px;
+  list-style: none;
+
+  @include short-viewport {
+    display: none;
+  }
 }
 
-.accent {
+.step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  @include glass;
+  border-radius: var(--radius-full);
+  padding: 7px 14px 7px 8px;
+  font-size: 12.5px;
+  color: var(--text-dim);
+
+  strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+}
+
+.stepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-soft);
   color: var(--accent);
+  font-family: $font-mono;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
 }

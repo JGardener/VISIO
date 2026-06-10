@@ -1,15 +1,49 @@
 :root {
-  --bg: #080a0e;
-  --surface: #0e1117;
-  --border: #1e2530;
+  // Surfaces
+  --bg: #06080d;
+  --surface: rgba(13, 18, 28, 0.82);
+  --surface-solid: #0d121c;
+  --surface-raised: rgba(22, 29, 43, 0.92);
+  --surface-input: rgba(6, 9, 14, 0.6);
+  --border: rgba(126, 150, 190, 0.16);
+  --border-strong: rgba(126, 150, 190, 0.34);
+
+  // Brand
   --accent: #00ffa3;
-  --accent2: #ff6b35;
-  --muted: #3a4455;
-  --text: #e8f0f8;
-  --text-dim: #8a9bb0;
+  --accent2: #00d4ff;
+  --accent-soft: rgba(0, 255, 163, 0.12);
+  --accent-grad: linear-gradient(135deg, #00ffa3 0%, #00d4ff 100%);
+  --danger: #ff6464;
+  --warning: #f5a623;
+  --success: #4ade80;
+
+  // Text (AA contrast on dark surfaces)
+  --text: #eef3fa;
+  --text-dim: #a3b3c9;
+  --text-faint: #66788f;
+  --on-accent: #041008;
+
+  // Focus
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent2);
+
+  // Motion
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 150ms;
+  --dur-med: 280ms;
+  --dur-slow: 500ms;
+
+  // Shape & depth
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 999px;
+  --blur: blur(18px) saturate(1.5);
+  --shadow-float: 0 16px 48px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-pop: 0 24px 80px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
+$font-sans: 'Inter', system-ui, sans-serif;
 $font-mono: 'Space Mono', monospace;
 $font-display: 'Syne', sans-serif;
-$panel-width: 340px;
 $mobile-breakpoint: 640px;
+$tablet-breakpoint: 900px;

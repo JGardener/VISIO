@@ -1,39 +1,22 @@
-import type { ControlsState, Palette } from '@/types';
 import HowItWorksOverlay from '@/components/HowItWorks/HowItWorksOverlay';
-import ControlsBar from '@/components/Controls/ControlsBar';
 import styles from './SceneCanvas.module.scss';
 
 interface SceneCanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   hasScene: boolean;
-  onOpenPanel: () => void;
-  controls: ControlsState;
-  onSpeedMult: (v: number) => void;
-  onPalette: (v: Palette | null) => void;
+  sceneLabel: string;
 }
 
-export default function SceneCanvas({
-  canvasRef,
-  hasScene,
-  onOpenPanel,
-  controls,
-  onSpeedMult,
-  onPalette,
-}: SceneCanvasProps) {
+export default function SceneCanvas({ canvasRef, hasScene, sceneLabel }: SceneCanvasProps) {
   return (
     <div className={styles.canvasWrap}>
-      <canvas ref={canvasRef} className={styles.canvas} />
-      <HowItWorksOverlay visible={!hasScene} />
-      <ControlsBar
-        visible={hasScene}
-        speedMult={controls.speedMult}
-        palette={controls.palette}
-        onSpeedMult={onSpeedMult}
-        onPalette={onPalette}
+      <canvas
+        ref={canvasRef}
+        className={styles.canvas}
+        role="img"
+        aria-label={hasScene ? `Animated scene: ${sceneLabel}` : 'Ambient welcome scene'}
       />
-      <button className={styles.mobileToggle} onClick={onOpenPanel}>
-        ✦ Describe Scene
-      </button>
+      <HowItWorksOverlay visible={!hasScene} />
     </div>
   );
 }

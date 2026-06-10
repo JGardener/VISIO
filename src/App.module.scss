@@ -1,20 +1,53 @@
 .app {
+  position: relative;
   width: 100vw;
   height: 100vh;
   height: 100dvh;
   background: var(--bg);
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
 }
 
-.main {
+.dockArea {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(720px, calc(100% - 24px));
   display: flex;
-  flex: 1;
-  overflow: hidden;
-  position: relative;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 20;
 
   @include mobile {
-    flex-direction: column;
+    width: calc(100% - 16px);
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    gap: 8px;
+  }
+}
+
+.dock {
+  width: 100%;
+  @include glass;
+  border-radius: var(--radius-lg);
+  padding: 14px 16px 10px;
+  box-shadow: var(--shadow-float);
+  animation: dockIn var(--dur-slow) var(--ease-out) both;
+  animation-delay: 60ms;
+
+  @include mobile {
+    padding: 12px 12px 8px;
+  }
+}
+
+@keyframes dockIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

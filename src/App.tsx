@@ -9,6 +9,7 @@ import {
   StatusLog,
   SceneJSON,
   HistoryPanel,
+  ControlsBar,
   HowItWorksModal,
 } from "@/components";
 import type { AppStatus } from "@/components/Header/Header";
@@ -29,30 +30,20 @@ export default function App() {
     clearSelection,
     getRemixPrompt,
   } = useHistory();
-  const { scene, loading, error, stepLabel, progress, streamBuffer, generate, setMode } =
-    useSceneGenerator();
+  const { loading, error, stepLabel, progress, streamBuffer, generate } = useSceneGenerator();
 
   const [prompt, setPrompt] = useState("");
+  const [lastPrompt, setLastPrompt] = useState("");
   const [panelOpen, setPanelOpen] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [hasScene, setHasScene] = useState(false);
 
   // activeScene is the single source of truth for what's on the canvas.
-  // It is set either by generation (via the scene effect below) or by handleLoad.
+  // It is set either by a finished generation (runGeneration) or by handleLoad.
   // Using state ensures the render effect always has the correct scene when
   // palette changes, eliminating the race where setPalette would trigger the
   // effect with the generator's old scene rather than the loaded entry's scene.
   const [activeScene, setActiveScene] = useState<SceneDefinition | null>(DEFAULT_SCENE);
-
-  const lastPromptRef = useRef("");
-
-  // Adopt generator output as the active scene
-  useEffect(() => {
-    if (!scene) return;
-    setActiveScene(scene);
-    setHasScene(true);
-    addEntry(lastPromptRef.current, scene);
-  }, [scene, addEntry]);
 
   // Re-render PIXI whenever the active scene or palette changes
   useEffect(() => {
@@ -83,56 +74,62 @@ export default function App() {
     applyControls(controls.speedMult);
   }, [controls.speedMult, applyControls]);
 
+  // Single path for every generation: resets controls, runs the request,
+  // and on success adopts the result as the active scene + history entry.
+  const runGeneration = useCallback(
+    async (requestPrompt: string, currentScene?: SceneDefinition) => {
+      setLastPrompt(requestPrompt);
+      setSpeedMult(1);
+      setPalette(PALETTES[0]);
+      const result = await generate(requestPrompt, currentScene);
+      if (result) {
+        setActiveScene(result);
+        setHasScene(true);
+        setPrompt("");
+        addEntry(requestPrompt, result);
+      }
+    },
+    [generate, setSpeedMult, setPalette, addEntry],
+  );
+
   const handleGenerate = useCallback(() => {
-    lastPromptRef.current = prompt;
-    setSpeedMult(1);
-    setPalette(PALETTES[0]);
-    setMode('generate');
-    void generate(prompt);
-  }, [generate, prompt, setSpeedMult, setPalette, setMode]);
+    void runGeneration(prompt);
+  }, [runGeneration, prompt]);
 
   const handleRefine = useCallback(() => {
     if (!activeScene) return;
-    lastPromptRef.current = prompt;
-    setSpeedMult(1);
-    setPalette(PALETTES[0]);
-    setMode('refine');
-    void generate(prompt, activeScene);
-  }, [generate, prompt, activeScene, setSpeedMult, setPalette, setMode]);
-
-  const handleLoad = useCallback(
-    (entry: HistoryEntry) => {
-      setSpeedMult(1);
-      setPalette(PALETTES[0]);
-      setActiveScene(entry.scene);
-      setPrompt(entry.prompt);
-      lastPromptRef.current = entry.prompt;
-      setHasScene(true);
-    },
-    [setSpeedMult, setPalette],
-  );
+    void runGeneration(prompt, activeScene);
+  }, [runGeneration, prompt, activeScene]);
 
   const handleChipSelect = useCallback(
     (chipPrompt: string) => {
       setPrompt(chipPrompt);
-      lastPromptRef.current = chipPrompt;
-      setSpeedMult(1);
-      setPalette(PALETTES[0]);
-      void generate(chipPrompt);
+      void runGeneration(chipPrompt);
     },
-    [generate, setSpeedMult, setPalette],
+    [runGeneration],
   );
 
   const handleRemix = useCallback(() => {
     const blendedPrompt = getRemixPrompt();
     if (!blendedPrompt) return;
     setPrompt(blendedPrompt);
-    lastPromptRef.current = blendedPrompt;
     clearSelection();
-    setSpeedMult(1);
-    setPalette(PALETTES[0]);
-    void generate(blendedPrompt);
-  }, [getRemixPrompt, clearSelection, generate, setSpeedMult, setPalette]);
+    setPanelOpen(false);
+    void runGeneration(blendedPrompt);
+  }, [getRemixPrompt, clearSelection, runGeneration]);
+
+  const handleLoad = useCallback(
+    (entry: HistoryEntry) => {
+      setSpeedMult(1);
+      setPalette(PALETTES[0]);
+      setActiveScene(entry.scene);
+      setPrompt("");
+      setLastPrompt(entry.prompt);
+      setHasScene(true);
+      setPanelOpen(false);
+    },
+    [setSpeedMult, setPalette],
+  );
 
   const appStatus: AppStatus = error
     ? 'error'
@@ -144,23 +141,30 @@ export default function App() {
 
   return (
     <div className={styles.app}>
+      <SceneCanvas
+        canvasRef={canvasRef}
+        hasScene={hasScene}
+        sceneLabel={lastPrompt || 'ambient particles'}
+      />
       <Header
         hasScene={hasScene}
-        promptSlug={slugify(lastPromptRef.current || "visio")}
+        promptSlug={slugify(lastPrompt || "visio")}
         canvasRef={canvasRef}
         onHowItWorks={() => setShowHowItWorks(true)}
+        onOpenLibrary={() => setPanelOpen(true)}
+        libraryOpen={panelOpen}
+        libraryCount={history.length}
         status={appStatus}
       />
-      <main className={styles.main}>
-        <SceneCanvas
-          canvasRef={canvasRef}
-          hasScene={hasScene}
-          onOpenPanel={() => setPanelOpen(true)}
-          controls={controls}
+      <main className={styles.dockArea}>
+        <ControlsBar
+          visible={hasScene}
+          speedMult={controls.speedMult}
+          palette={controls.palette}
           onSpeedMult={setSpeedMult}
           onPalette={setPalette}
         />
-        <Panel isOpen={panelOpen} onClose={() => setPanelOpen(false)}>
+        <div className={styles.dock}>
           <PromptInput
             value={prompt}
             onChange={setPrompt}
@@ -170,24 +174,26 @@ export default function App() {
             loading={loading}
             hasScene={hasScene}
           />
-          <HistoryPanel
-            history={history}
-            selectedIds={selectedIds}
-            onToggleSelect={toggleSelect}
-            onClearSelection={clearSelection}
-            onClearHistory={clearHistory}
-            onRemix={handleRemix}
-            onLoad={handleLoad}
-          />
-          <SceneJSON scene={activeScene} streamBuffer={streamBuffer} />
           <StatusLog
             loading={loading}
             error={error}
             stepLabel={stepLabel}
             progress={progress}
           />
-        </Panel>
+        </div>
       </main>
+      <Panel isOpen={panelOpen} onClose={() => setPanelOpen(false)} title="Library">
+        <HistoryPanel
+          history={history}
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
+          onClearSelection={clearSelection}
+          onClearHistory={clearHistory}
+          onRemix={handleRemix}
+          onLoad={handleLoad}
+        />
+        <SceneJSON scene={activeScene} streamBuffer={streamBuffer} />
+      </Panel>
       {showHowItWorks && (
         <HowItWorksModal onClose={() => setShowHowItWorks(false)} />
       )}

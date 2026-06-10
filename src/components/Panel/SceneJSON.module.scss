@@ -1,52 +1,57 @@
 .sceneJson {
-  flex: 1;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid var(--border);
+  padding: 6px 20px 18px;
 }
 
 .jsonHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px 8px;
+  padding: 12px 0 8px;
   flex-shrink: 0;
 }
 
 .toggleBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 4px 0;
+  border-radius: var(--radius-sm);
+
+  &:hover .label,
+  &:hover .chevron {
+    color: var(--text);
+  }
+
+  @include focus-ring;
 }
 
 .label {
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 700;
   color: var(--text-dim);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   font-family: $font-mono;
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .chevron {
   font-size: 8px;
-  color: var(--text-dim);
+  color: var(--text-faint);
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .copyBtn {
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  font-size: 10px;
-  padding: 3px 10px;
-  background: transparent;
-  color: var(--text-dim);
-  cursor: pointer;
+  @include ghost-button;
   font-family: $font-mono;
-  transition: color 0.15s, border-color 0.15s;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
 
   &.copied {
     color: var(--accent);
@@ -55,18 +60,29 @@
 }
 
 .jsonBlock {
-  flex: 1;
+  max-height: 320px;
   overflow-y: auto;
-  margin: 0 20px 20px;
-  background: var(--bg);
+  background: var(--surface-input);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   padding: 14px;
-  font-size: 13px;
+  font-size: 12px;
   font-family: $font-mono;
   white-space: pre-wrap;
   word-break: break-all;
   line-height: 1.6;
+  animation: jsonIn var(--dur-med) var(--ease-out) both;
+}
+
+@keyframes jsonIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 // Global JSON syntax highlight token colours (used by syntaxHighlight() output)

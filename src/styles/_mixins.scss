@@ -5,3 +5,66 @@
     @content;
   }
 }
+
+@mixin tablet {
+  @media (max-width: #{$tablet-breakpoint}) {
+    @content;
+  }
+}
+
+@mixin short-viewport {
+  @media (max-height: 600px) {
+    @content;
+  }
+}
+
+// Frosted-glass floating surface
+@mixin glass {
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--border);
+}
+
+// Visible keyboard focus indicator (WCAG 2.4.7)
+@mixin focus-ring {
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+}
+
+// Quiet bordered button used for secondary actions
+@mixin ghost-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-dim);
+  font-family: $font-sans;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 8px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+
+  &:hover:not(:disabled) {
+    border-color: var(--border-strong);
+    color: var(--text);
+    background: rgba(126, 150, 190, 0.08);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  @include focus-ring;
+}

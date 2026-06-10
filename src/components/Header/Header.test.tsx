@@ -6,10 +6,13 @@ const defaultProps = {
   promptSlug: 'test',
   canvasRef: { current: null },
   onHowItWorks: () => {},
+  onOpenLibrary: () => {},
+  libraryOpen: false,
+  libraryCount: 0,
 };
 
-function renderHeader(status: AppStatus) {
-  return render(<Header {...defaultProps} status={status} />);
+function renderHeader(status: AppStatus, overrides: Partial<typeof defaultProps> = {}) {
+  return render(<Header {...defaultProps} {...overrides} status={status} />);
 }
 
 describe('How It Works button', () => {
@@ -20,7 +23,7 @@ describe('How It Works button', () => {
   });
 });
 
-describe('Header status dot', () => {
+describe('Header status', () => {
   it('has title "Idle" when status is idle', () => {
     renderHeader('idle');
     expect(document.querySelector('[title="Idle"]')).toBeInTheDocument();
@@ -39,5 +42,35 @@ describe('Header status dot', () => {
   it('has title "Error" when status is error', () => {
     renderHeader('error');
     expect(document.querySelector('[title="Error"]')).toBeInTheDocument();
+  });
+
+  it('announces status via a live region', () => {
+    renderHeader('streaming');
+    expect(screen.getByRole('status')).toHaveTextContent('Generating…');
+  });
+});
+
+describe('Header actions', () => {
+  it('Export PNG is disabled without a scene', () => {
+    renderHeader('idle');
+    expect(screen.getByRole('button', { name: /export png/i })).toBeDisabled();
+  });
+
+  it('Export PNG is enabled with a scene', () => {
+    renderHeader('ready', { hasScene: true });
+    expect(screen.getByRole('button', { name: /export png/i })).toBeEnabled();
+  });
+
+  it('Library button shows the entry count', () => {
+    renderHeader('ready', { libraryCount: 3 });
+    expect(screen.getByRole('button', { name: /library/i })).toHaveTextContent('3');
+  });
+
+  it('Library button exposes expanded state', () => {
+    renderHeader('ready', { libraryOpen: true });
+    expect(screen.getByRole('button', { name: /library/i })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
   });
 });

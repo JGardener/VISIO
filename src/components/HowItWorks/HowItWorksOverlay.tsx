@@ -1,25 +1,9 @@
-import PipelineStep from './PipelineStep';
 import styles from './HowItWorksOverlay.module.scss';
 
 const STEPS = [
-  {
-    label: 'Describe a scene',
-    description:
-      'Type anything in plain English — a solar system, a fire, a digital rainstorm.',
-  },
-  {
-    label: 'Claude interprets it',
-    description:
-      "Your prompt is sent to Claude's API, which returns a structured JSON scene definition.",
-  },
-  {
-    label: 'PIXI.js renders it',
-    description: 'The JSON drives a WebGL canvas — animated in real time, entirely in your browser.',
-  },
-  {
-    label: 'You take control',
-    description: 'Adjust speed and palette. Remix two scenes together. Export as PNG.',
-  },
+  { number: 1, label: 'Describe', detail: 'any scene in plain English' },
+  { number: 2, label: 'Generate', detail: 'Claude builds it as living art' },
+  { number: 3, label: 'Play', detail: 'refine, remix, recolour, export' },
 ];
 
 interface HowItWorksOverlayProps {
@@ -28,21 +12,30 @@ interface HowItWorksOverlayProps {
 
 export default function HowItWorksOverlay({ visible }: HowItWorksOverlayProps) {
   return (
-    <div className={`${styles.overlay}${visible ? '' : ` ${styles.hidden}`}`}>
-      <div className={styles.title}>
-        Welcome to <span className={styles.accent}>VISIO</span>
-      </div>
-      <div className={styles.subtitle}>AI-powered interactive scene visualiser</div>
-      <div className={styles.steps}>
-        {STEPS.map((s, i) => (
-          <PipelineStep
-            key={s.label}
-            number={i + 1}
-            label={s.label}
-            description={s.description}
-            isLast={i === STEPS.length - 1}
-          />
-        ))}
+    <div className={`${styles.overlay}${visible ? '' : ` ${styles.hidden}`}`} aria-hidden={!visible}>
+      <div className={styles.hero}>
+        <p className={styles.eyebrow}>AI scene studio</p>
+        <h1 className={styles.title}>
+          Describe a scene.
+          <br />
+          <span className={styles.titleAccent}>Watch it come alive.</span>
+        </h1>
+        <p className={styles.subtitle}>
+          VISIO turns a sentence into animated WebGL art — interpreted by Claude, rendered live in
+          your browser.
+        </p>
+        <ol className={styles.steps}>
+          {STEPS.map((s) => (
+            <li key={s.number} className={styles.step}>
+              <span className={styles.stepNumber} aria-hidden="true">
+                {s.number}
+              </span>
+              <span className={styles.stepText}>
+                <strong>{s.label}</strong> {s.detail}
+              </span>
+            </li>
+          ))}
+        </ol>
       </div>
     </div>
   );

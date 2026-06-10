@@ -1,48 +1,57 @@
 .statusLog {
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
+  width: 100%;
 }
 
 .progressTrack {
   height: 2px;
-  background: transparent;
-  position: relative;
+  background: rgba(126, 150, 190, 0.12);
+  border-radius: 1px;
+  overflow: hidden;
 }
 
 .progressBar {
-  height: 2px;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-  transition: width 0.4s ease;
+  height: 100%;
+  background: var(--accent-grad);
+  border-radius: 1px;
+  transition:
+    width var(--dur-slow) var(--ease-out),
+    opacity var(--dur-med) var(--ease-out);
 }
 
 .logRow {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
-  min-height: 38px;
+  padding-top: 7px;
   font-size: 12px;
-  font-family: $font-mono;
   color: var(--text-dim);
+  min-height: 24px;
+}
+
+.hint {
+  color: var(--text-faint);
+
+  @include mobile {
+    display: none; // keyboard hint is meaningless on touch
+  }
+}
+
+.errorText {
+  color: var(--danger);
+}
+
+.successText {
+  color: var(--success);
 }
 
 .spinner {
   width: 12px;
   height: 12px;
-  border: 1px solid var(--muted);
+  border: 2px solid rgba(0, 255, 163, 0.25);
   border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
   flex-shrink: 0;
-}
-
-.errorText {
-  color: var(--accent2);
-}
-
-.successText {
-  color: var(--accent);
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {

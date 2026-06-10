@@ -32,12 +32,11 @@ export function usePixi(
     if (!canvas) return;
 
     let app: PIXI.Application | null = null;
-    let rafId: number;
     let cancelled = false;
 
     // Defer until after browser layout so the flex container has real dimensions.
     // PIXI reads gl.MAX_FRAGMENT_UNIFORM_VECTORS at init time — returns 0 on a 0×0 canvas.
-    rafId = requestAnimationFrame(() => {
+    const rafId = requestAnimationFrame(() => {
       (async () => {
         const instance = new PIXI.Application();
         await instance.init({

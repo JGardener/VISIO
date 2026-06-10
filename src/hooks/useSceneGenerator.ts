@@ -14,7 +14,7 @@ export interface SceneGeneratorState {
 export type SceneMode = 'generate' | 'refine';
 
 export interface UseSceneGeneratorReturn extends SceneGeneratorState {
-  generate: (prompt: string, currentScene?: SceneDefinition) => Promise<void>;
+  generate: (prompt: string, currentScene?: SceneDefinition) => Promise<SceneDefinition | null>;
   mode: SceneMode;
   setMode: (mode: SceneMode) => void;
 }
@@ -32,7 +32,10 @@ export function useSceneGenerator(): UseSceneGeneratorReturn {
 
   const firstChunkRef = useRef(true);
 
-  const generate = useCallback(async (prompt: string, currentScene?: SceneDefinition) => {
+  const generate = useCallback(async (
+    prompt: string,
+    currentScene?: SceneDefinition,
+  ): Promise<SceneDefinition | null> => {
     firstChunkRef.current = true;
 
     setState({
@@ -69,6 +72,7 @@ export function useSceneGenerator(): UseSceneGeneratorReturn {
         progress: 100,
         streamBuffer: '',
       });
+      return scene;
     } catch (err) {
       const msg = err instanceof VisioError ? getErrorMessage(err.code) : 'Something went wrong';
       setState((prev) => ({
@@ -80,6 +84,7 @@ export function useSceneGenerator(): UseSceneGeneratorReturn {
         progress: 0,
         streamBuffer: '',
       }));
+      return null;
     }
   }, []);
 
