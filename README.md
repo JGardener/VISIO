@@ -5,13 +5,12 @@
 VISIO takes a natural-language description, sends it to the Claude API, and renders a live WebGL animation in your browser. Type anything — _"a solar system with three moons"_, _"a digital rainstorm"_, _"a campfire on a dark night"_ — and watch the scene appear in real time. Adjust speed, zoom, and colour palette on the fly, remix two scenes together, and export your creation as a PNG.
 
 ---
-
 ## Tech Stack
 
-![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![React](https://img.shields.io/github/package-json/dependency-version/JGardener/VISIO/react?label=React&color=61DAFB&logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
-![PIXI.js](https://img.shields.io/badge/PIXI.js-v7-e91e8c)
-![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
+![PIXI.js](https://img.shields.io/github/package-json/dependency-version/JGardener/VISIO/pixi.js?label=PIXI.js&color=e91e8c)
+![Vite|65](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
 ![Claude API](https://img.shields.io/badge/Claude-API-cc785c)
 
 ---
@@ -60,5 +59,5 @@ Open [http://localhost:5173](http://localhost:5173).
 
 ## Known Limitations
 
-- **API key required** — VISIO calls the Anthropic Claude API directly from the browser. You need a valid `VITE_ANTHROPIC_API_KEY` in `.env.local`.
+- **API key required** — VISIO calls the Anthropic Claude API through a server-side Vercel Edge function (`api/generate.ts`), which keeps the key off the client. You need a valid `ANTHROPIC_API_KEY` as an env var (in `.env.local` for local `vercel dev`, or in your Vercel project settings when deployed).
 - **PNG export on iOS Safari** — The `<a download>` trigger is blocked in iOS Safari when not on HTTPS. Works correctly once deployed to any standard HTTPS host (e.g. Vercel).
