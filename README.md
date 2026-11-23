@@ -1,6 +1,10 @@
 # VISIO
 
+[![CI](https://github.com/JGardener/VISIO/actions/workflows/ci.yml/badge.svg)](https://github.com/JGardener/VISIO/actions/workflows/ci.yml)
+
 > AI-powered interactive scene visualiser
+>
+> **[Live demo →](https://jgardener-visio.vercel.app)**
 
 VISIO takes a natural-language description, sends it to the Claude API, and renders a live WebGL animation in your browser. Type anything — _"a solar system with three moons"_, _"a digital rainstorm"_, _"a campfire on a dark night"_ — and watch the scene appear in real time. Adjust speed, zoom, and colour palette on the fly, remix two scenes together, and export your creation as a PNG.
 
@@ -27,12 +31,14 @@ npm install
 
 **2. Add your API key**
 
-Copy `.env.example` to `.env.local` and fill in your Anthropic API key:
+The browser never sees the key: the app posts to `/api/generate`, a server-side Vercel Edge function (`api/generate.ts`) that reads `ANTHROPIC_API_KEY` and proxies the Claude API. Copy `.env.example` to `.env.local` and fill in your Anthropic API key:
 
 ```bash
 cp .env.example .env.local
-# then edit .env.local and set VITE_ANTHROPIC_API_KEY=sk-ant-...
+# then edit .env.local and set ANTHROPIC_API_KEY=sk-ant-...
 ```
+
+In local dev, `npm run dev` serves `/api/generate` through a Vite middleware (see `vite.config.ts`) that loads `ANTHROPIC_API_KEY` from `.env.local`. When deployed, set `ANTHROPIC_API_KEY` in your Vercel project settings.
 
 Get a key at [console.anthropic.com](https://console.anthropic.com).
 
