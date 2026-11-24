@@ -1,5 +1,7 @@
 # VISIO
 
+[![CI](https://github.com/JGardener/VISIO/actions/workflows/ci.yml/badge.svg)](https://github.com/JGardener/VISIO/actions/workflows/ci.yml)
+
 > AI-powered interactive scene visualiser
 >
 > **[Live demo →](https://jgardener-visio.vercel.app)**
